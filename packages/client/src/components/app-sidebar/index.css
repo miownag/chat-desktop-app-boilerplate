@@ -1,0 +1,8 @@
+.sidebar-content {
+  scrollbar-width: none;
+  scrollbar-color: #cacaca;
+}
+
+.sidebar-content:hover {
+  /* scrollbar-width: thin; */
+}

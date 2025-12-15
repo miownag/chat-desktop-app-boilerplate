@@ -1,0 +1,25 @@
+{
+  "name": "chat-desktop-app-boilerplate",
+  "version": "1.0.0",
+  "description": "A boilerplate for a chat desktop app using Tauri, React, Hono and langchain.",
+  "author": "Mio",
+  "license": "MIT",
+  "keywords": [
+    "tauri",
+    "react",
+    "hono",
+    "langchain",
+    "shadcn",
+    "typescript",
+    "bun",
+    "chat",
+    "desktop-app",
+    "boilerplate"
+  ],
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter 'server' dev & bun --filter 'client' tauri dev"
+  }
+}
