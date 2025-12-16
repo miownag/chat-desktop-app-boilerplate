@@ -20,9 +20,9 @@ function UserMessage({ message }: UserMessageProps) {
       key={message.id}
       className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-6 items-start"
     >
-      <div className="group flex flex-col items-end gap-1">
+      <div className="group flex flex-col items-end gap-1 w-full">
         <div className="flex flex-row-reverse gap-4">
-          <MessageAvatar src="https://github.com/ibelick.png" alt="Ibelick" />
+          <MessageAvatar src="https://github.com/shadcn.png" alt="shadcn" />
           <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%]">
             {message.content}
           </MessageContent>

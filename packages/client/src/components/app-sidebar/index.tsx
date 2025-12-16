@@ -114,7 +114,7 @@ function AppSidebar() {
   );
 
   return (
-    <Sidebar className="px-0.5">
+    <Sidebar className="px-0.5 py-2">
       <AlertDialogConfirm
         title="Are you sure to delete?"
         description="This action cannot be undone. This will permanently delete this conversation."
@@ -128,9 +128,9 @@ function AppSidebar() {
       />
       <SidebarHeader>
         <div className="flex items-center justify-between">
-          <Space gap={4}>
-            <GiSittingDog className="w-8 h-8 text-neutral-700" />
-            Dogbot
+          <Space gap={3}>
+            <img src="/chat.png" alt="chatbot" className="w-8 h-8" />
+            <div className="font-bold font-mono text-lg bg-linear-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent">Chatbot</div>
           </Space>
           {open && (
             <Button
@@ -145,11 +145,11 @@ function AppSidebar() {
         </div>
         <Button
           variant="outline"
-          className="mt-4 cursor-pointer"
+          className="mt-3 cursor-pointer"
           onClick={addNewConversation}
         >
-          <MdAdd className="text-neutral-700" />
-          Add New Chat
+          <MdAdd />
+          New Chat
         </Button>
       </SidebarHeader>
       <SidebarContent className="sidebar-content">

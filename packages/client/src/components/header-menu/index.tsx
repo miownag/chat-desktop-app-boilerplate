@@ -13,7 +13,7 @@ function HeaderMenu() {
   );
 
   return (
-    <div className="flex justify-between py-1.5 px-3 items-center h-12">
+    <div className="flex justify-between py-2 px-3 items-center h-12">
       {!open ? (
         <Space>
           <Button
