@@ -29,17 +29,10 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Button } from "../ui/button";
+import { useState } from "react";
+import useGroupedConversationList from "@/hooks/use-grouped-conversation-list";
 
 interface ConversationListProps {
-  historyConversations: {
-    period: string;
-    conversations: {
-      id: string;
-      title: string;
-      lastMessage: string;
-      timestamp: number;
-    }[];
-  }[];
   setAlertId: (id: string) => void;
   setAlertOpen: (open: boolean) => void;
 }
@@ -71,24 +64,35 @@ function EmptyConversationList() {
   );
 }
 
-function ConversationList({
-  historyConversations,
-  setAlertId,
-  setAlertOpen,
-}: ConversationListProps) {
-  const { currentConversationId, setCurrentConversationId } =
-    useShallowChatBotStore((state) =>
-      pick(state, [
-        "currentConversationId",
-        "setCurrentConversationId",
-        "addNewConversation",
-        "setCurrentConversationId",
-      ])
-    );
+function ConversationList({ setAlertId, setAlertOpen }: ConversationListProps) {
+  const {
+    currentConversationId,
+    setCurrentConversationId,
+    addLoadedConversationIds,
+  } = useShallowChatBotStore((state) =>
+    pick(state, [
+      "currentConversationId",
+      "setCurrentConversationId",
+      "addNewConversation",
+      "setCurrentConversationId",
+      "addLoadedConversationIds",
+    ])
+  );
+  const [pageConfig, setPageConfig] = useState({
+    page: 1,
+    pageSize: 10,
+  });
+  const { data, isLoading, isError } = useGroupedConversationList({
+    page: pageConfig.page,
+    pageSize: pageConfig.pageSize,
+  });
+
+  console.log("==========>", data);
 
   const checkoutConversation = (id: string) => {
     // 注意：keep alive
     setCurrentConversationId(id);
+    addLoadedConversationIds([id]);
   };
 
   const copyConversationId = async (id: string) => {
@@ -100,14 +104,15 @@ function ConversationList({
     }
   };
 
+  // TODO: Add loading
   return (
-    <>
-      {historyConversations?.length > 0 ? (
-        historyConversations.map((group) => (
-          <SidebarGroup key={group.period}>
-            <SidebarGroupLabel>{group.period}</SidebarGroupLabel>
+    <div>
+      {Object.keys(data)?.length > 0 ? (
+        Object.keys(data).map((period) => (
+          <SidebarGroup key={period}>
+            <SidebarGroupLabel>{period}</SidebarGroupLabel>
             <SidebarMenu>
-              {group.conversations.map((conversation) => (
+              {data[period].map((conversation) => (
                 <SidebarMenuItem
                   key={conversation.id}
                   onClick={() => checkoutConversation(conversation.id)}
@@ -161,7 +166,7 @@ function ConversationList({
       ) : (
         <EmptyConversationList />
       )}
-    </>
+    </div>
   );
 }
 

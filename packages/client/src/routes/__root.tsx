@@ -3,17 +3,24 @@ import AppSidebar from "@/components/app-sidebar";
 import HeaderMenu from "@/components/header-menu";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+
+const queryClient = new QueryClient();
 
 function RootComponent() {
   return (
-    <SidebarProvider>
-      <Toaster />
-      <AppSidebar />
-      <main className="flex-1 flex flex-col h-screen">
-        <HeaderMenu />
-        <Outlet />
-      </main>
-    </SidebarProvider>
+    <QueryClientProvider client={queryClient}>
+      <ReactQueryDevtools />
+      <SidebarProvider>
+        <Toaster />
+        <AppSidebar />
+        <main className="flex-1 flex flex-col h-screen">
+          <HeaderMenu />
+          <Outlet />
+        </main>
+      </SidebarProvider>
+    </QueryClientProvider>
   );
 }
 

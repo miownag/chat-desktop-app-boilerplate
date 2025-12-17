@@ -3,6 +3,7 @@ import { ChatContainerContent, ChatContainerRoot } from "../ui/chat-container";
 import { ScrollButton } from "../ui/scroll-button";
 import AssistantMessage from "./components/assistant-message";
 import UserMessage from "./components/user-message";
+import useGetMessages from "@/hooks/apis/use-get-messages";
 
 export type ChatMessage = {
   id: number;
@@ -11,21 +12,29 @@ export type ChatMessage = {
 };
 
 interface MessageListProps {
-  chatMessages: ChatMessage[];
+  conversationId: string;
 }
 
-function MessageList({ chatMessages }: MessageListProps) {
+function MessageList({ conversationId }: MessageListProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { data } = useGetMessages({
+    conversationId,
+  });
+
+  console.log("===========>", data);
 
   return (
-    <div ref={chatContainerRef} className="relative flex-1 overflow-y-auto">
+    <div
+      ref={chatContainerRef}
+      className="relative flex-1 overflow-y-auto w-2xl"
+    >
       <ChatContainerRoot className="h-full">
         <ChatContainerContent className="space-y-0 px-5 py-12">
-          {chatMessages.map((message, index) =>
+          {data?.data?.data?.map((message: ChatMessage, index: number) =>
             message.role === "assistant" ? (
               <AssistantMessage
                 message={message}
-                isLastMessage={index === chatMessages.length - 1}
+                isLastMessage={index === data?.data?.data?.length - 1}
               />
             ) : (
               <UserMessage message={message} />

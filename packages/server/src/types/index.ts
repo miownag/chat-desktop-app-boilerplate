@@ -1,17 +1,17 @@
 export interface Session {
   id: string;
   title: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   messageCount: number;
 }
 
 export interface Message {
   id: string;
   sessionId: string;
-  role: 'user' | 'assistant' | 'system';
+  role: "user" | "assistant" | "system";
   content: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface PaginatedResponse<T> {

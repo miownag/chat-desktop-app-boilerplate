@@ -1,5 +1,5 @@
+import CopyBtn from "@/components/copy-btn";
 import type { ChatMessage } from "@/components/message-list";
-import { Button } from "@/components/ui/button";
 import {
   Message,
   MessageAction,
@@ -8,20 +8,22 @@ import {
   MessageContent,
 } from "@/components/ui/message";
 import { cn } from "@/lib/utils";
-import { LuCopy } from "react-icons/lu";
+import { useState } from "react";
 
 interface UserMessageProps {
   message: ChatMessage;
 }
 
 function UserMessage({ message }: UserMessageProps) {
+  const [copied, setCopied] = useState(false);
+
   return (
     <Message
       key={message.id}
       className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-6 items-start"
     >
       <div className="group flex flex-col items-end gap-1 w-full">
-        <div className="flex flex-row-reverse gap-4">
+        <div className="flex flex-row-reverse gap-4 w-full">
           <MessageAvatar src="https://github.com/shadcn.png" alt="shadcn" />
           <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%]">
             {message.content}
@@ -31,13 +33,11 @@ function UserMessage({ message }: UserMessageProps) {
           className={cn("mr-10 flex gap-0 opacity-0 group-hover:opacity-100")}
         >
           <MessageAction tooltip="Copy" delayDuration={100}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full cursor-pointer"
-            >
-              <LuCopy />
-            </Button>
+            <CopyBtn
+              content={message.content}
+              copied={copied}
+              setCopied={setCopied}
+            />
           </MessageAction>
         </MessageActions>
       </div>
