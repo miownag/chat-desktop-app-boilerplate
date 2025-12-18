@@ -187,4 +187,28 @@ export class MessageService {
 
     return false;
   }
+
+  static async updateFeedback(
+    conversationId: string,
+    messageId: string,
+    actionType: "like" | "dislike",
+    action: "submit" | "cancel"
+  ): Promise<Message | null> {
+    const sessionMessages = messages.get(conversationId) || [];
+    const messageIndex = sessionMessages.findIndex(
+      (msg) => msg.id === messageId
+    );
+    const feedbackStatus =
+      action === "cancel" ? null : actionType === "like" ? "liked" : "disliked";
+    if (messageIndex !== -1) {
+      const updatedMessage = {
+        ...sessionMessages[messageIndex],
+        feedback: feedbackStatus as typeof feedbackStatus,
+      };
+      sessionMessages[messageIndex] = updatedMessage;
+      messages.set(conversationId, sessionMessages);
+      return updatedMessage;
+    }
+    return null;
+  }
 }

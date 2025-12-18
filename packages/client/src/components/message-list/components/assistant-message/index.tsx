@@ -1,4 +1,3 @@
-import CopyBtn from "@/components/copy-btn";
 import type { ChatMessage } from "@/components/message-list";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +10,14 @@ import {
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { AiOutlineSync } from "react-icons/ai";
-import { LuThumbsDown, LuThumbsUp } from "react-icons/lu";
+import { LuCopy } from "react-icons/lu";
+import { MdCheck } from "react-icons/md";
+import {
+  RiThumbUpFill,
+  RiThumbUpLine,
+  RiThumbDownFill,
+  RiThumbDownLine,
+} from "react-icons/ri";
 
 interface AssistantMessageProps {
   message: ChatMessage;
@@ -20,6 +26,30 @@ interface AssistantMessageProps {
 
 function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
   const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const handleFeedback = (actionType: "like" | "dislike") => {
+    const status = message.feedback;
+    if (
+      (status === "liked" && actionType == "like") ||
+      (status === "disliked" && actionType == "dislike")
+    ) {
+      // TODO: cancel and update
+    } else {
+      // TODO: send and update
+    }
+  };
 
   return (
     <Message
@@ -52,19 +82,37 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
             </Button>
           </MessageAction>
           <MessageAction tooltip="Copy" delayDuration={100}>
-            <CopyBtn
-              content={message.content}
-              copied={copied}
-              setCopied={setCopied}
-            />
+            {!copied ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full cursor-pointer"
+                onClick={handleCopy}
+              >
+                <LuCopy />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full cursor-pointer"
+              >
+                <MdCheck color="green" />
+              </Button>
+            )}
           </MessageAction>
           <MessageAction tooltip="Upvote" delayDuration={100}>
             <Button
               variant="ghost"
               size="icon"
               className="rounded-full cursor-pointer"
+              onClick={() => handleFeedback("like")}
             >
-              <LuThumbsUp />
+              {message.feedback === "liked" ? (
+                <RiThumbUpFill />
+              ) : (
+                <RiThumbUpLine />
+              )}
             </Button>
           </MessageAction>
           <MessageAction tooltip="Downvote" delayDuration={100}>
@@ -72,8 +120,13 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
               variant="ghost"
               size="icon"
               className="rounded-full cursor-pointer"
+              onClick={() => handleFeedback("dislike")}
             >
-              <LuThumbsDown />
+              {message.feedback === "disliked" ? (
+                <RiThumbDownFill />
+              ) : (
+                <RiThumbDownLine />
+              )}
             </Button>
           </MessageAction>
         </MessageActions>

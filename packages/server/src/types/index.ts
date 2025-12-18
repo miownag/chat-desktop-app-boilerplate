@@ -12,6 +12,7 @@ export interface Message {
   role: "user" | "assistant" | "system";
   content: string;
   createdAt: string;
+  feedback?: "liked" | "disliked" | null;
 }
 
 export interface PaginatedResponse<T> {

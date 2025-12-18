@@ -122,4 +122,28 @@ messages.post("/send", async (c) => {
   return c.body(stream);
 });
 
+messages.post(
+  "/feedback",
+  zValidator(
+    "json",
+    z.object({
+      conversationId: z.string(),
+      messageId: z.string(),
+      actionType: z.enum(["like", "dislike"]),
+      action: z.enum(["submit", "cancel"]),
+    })
+  ),
+  async (c) => {
+    const { conversationId, messageId, actionType, action } =
+      c.req.valid("json");
+    const result = await MessageService.updateFeedback(
+      conversationId,
+      messageId,
+      actionType,
+      action
+    );
+    return c.json(result);
+  }
+);
+
 export default messages;

@@ -1,5 +1,5 @@
-import CopyBtn from "@/components/copy-btn";
 import type { ChatMessage } from "@/components/message-list";
+import { Button } from "@/components/ui/button";
 import {
   Message,
   MessageAction,
@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/message";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { LuCopy } from "react-icons/lu";
+import { MdCheck } from "react-icons/md";
 
 interface UserMessageProps {
   message: ChatMessage;
@@ -16,6 +18,18 @@ interface UserMessageProps {
 
 function UserMessage({ message }: UserMessageProps) {
   const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
 
   return (
     <Message
@@ -33,11 +47,24 @@ function UserMessage({ message }: UserMessageProps) {
           className={cn("mr-10 flex gap-0 opacity-0 group-hover:opacity-100")}
         >
           <MessageAction tooltip="Copy" delayDuration={100}>
-            <CopyBtn
-              content={message.content}
-              copied={copied}
-              setCopied={setCopied}
-            />
+            {!copied ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full cursor-pointer"
+                onClick={handleCopy}
+              >
+                <LuCopy />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full cursor-pointer"
+              >
+                <MdCheck color="green" />
+              </Button>
+            )}
           </MessageAction>
         </MessageActions>
       </div>

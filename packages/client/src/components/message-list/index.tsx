@@ -9,6 +9,7 @@ export type ChatMessage = {
   id: number;
   role: string;
   content: string;
+  feedback?: "liked" | "disliked";
 };
 
 interface MessageListProps {
