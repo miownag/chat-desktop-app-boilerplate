@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import MainBox from "@/components/main-box";
 import { useShallowChatBotStore } from "@/stores";
 import { pick } from "es-toolkit";
-import { twJoin } from "tailwind-merge";
+import Welcome from "@/components/welcome";
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
@@ -15,18 +15,14 @@ function IndexComponent() {
     );
   return (
     <>
-      {loadedConversationIds?.map((id) => {
-        return (
-          <div
-            className={twJoin(
-              "p-2 flex-1 flex flex-col items-center justify-center overflow-auto",
-              `${id === currentConversationId ? "" : "hidden"}`
-            )}
-          >
-            <MainBox key={id} conversationId={id} />
-          </div>
-        );
-      })}
+      {!loadedConversationIds?.length && <Welcome />}
+      {loadedConversationIds?.map((id) => (
+        <MainBox
+          key={id}
+          conversationId={id}
+          isActive={id === currentConversationId}
+        />
+      ))}
     </>
   );
 }

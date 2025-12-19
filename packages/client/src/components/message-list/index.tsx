@@ -4,6 +4,7 @@ import { ScrollButton } from "../ui/scroll-button";
 import AssistantMessage from "./components/assistant-message";
 import UserMessage from "./components/user-message";
 import useGetMessages from "@/hooks/apis/use-get-messages";
+import Welcome from "../welcome";
 
 export type ChatMessage = {
   id: number;
@@ -14,17 +15,20 @@ export type ChatMessage = {
 
 interface MessageListProps {
   conversationId: string;
+  isActive: boolean;
 }
 
-function MessageList({ conversationId }: MessageListProps) {
+function MessageList({ conversationId, isActive }: MessageListProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { data } = useGetMessages({
     conversationId,
   });
 
-  console.log("===========>", data);
+  if (!isActive) {
+    return null;
+  }
 
-  return (
+  return data?.data?.data?.length > 0 ? (
     <div
       ref={chatContainerRef}
       className="relative flex-1 overflow-y-auto w-2xl"
@@ -47,6 +51,8 @@ function MessageList({ conversationId }: MessageListProps) {
         </div>
       </ChatContainerRoot>
     </div>
+  ) : (
+    <Welcome />
   );
 }
 

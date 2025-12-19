@@ -1,5 +1,5 @@
-import { BiMessageRoundedAdd } from "react-icons/bi";
-import { RiSideBarLine } from "react-icons/ri";
+import { TbMessagePlus } from "react-icons/tb";
+import { PiSidebar } from "react-icons/pi";
 import { useChatBotStore } from "@/stores";
 import AccountManage from "../account-manage";
 import Space from "../space";
@@ -22,7 +22,7 @@ function HeaderMenu() {
             className="cursor-pointer"
             onClick={toggleSidebar}
           >
-            <RiSideBarLine className="w-5! h-5! text-neutral-500" />
+            <PiSidebar className="w-6! h-6! text-neutral-500" />
           </Button>
           <Button
             size="icon"
@@ -30,7 +30,7 @@ function HeaderMenu() {
             className="cursor-pointer"
             onClick={addNewConversation}
           >
-            <BiMessageRoundedAdd className="w-5! h-5! text-neutral-500" />
+            <TbMessagePlus className="w-5! h-5! text-neutral-500" />
           </Button>
         </Space>
       ) : (

@@ -46,7 +46,10 @@ function UserMessage({ message }: UserMessageProps) {
         <MessageActions
           className={cn("mr-10 flex gap-0 opacity-0 group-hover:opacity-100")}
         >
-          <MessageAction tooltip="Copy" delayDuration={100}>
+          <MessageAction
+            tooltip={copied ? "Copied!" : "Copy"}
+            delayDuration={100}
+          >
             {!copied ? (
               <Button
                 variant="ghost"

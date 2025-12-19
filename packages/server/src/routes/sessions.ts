@@ -25,12 +25,21 @@ sessions.post(
 );
 
 // Create new session
-sessions.post("/create", async (c) => {
-  const body = await c.req.json<{ title?: string }>();
-  const session = await SessionService.createSession(body?.title);
+sessions.post(
+  "/create",
+  zValidator(
+    "json",
+    z.object({
+      title: z.string().optional(),
+    })
+  ),
+  async (c) => {
+    const { title } = c.req.valid("json");
+    const session = await SessionService.createSession(title || "New Chat");
 
-  return c.json(session, 201);
-});
+    return c.json(session);
+  }
+);
 
 // Get session by ID
 sessions.get("/get/:id", async (c) => {
@@ -45,15 +54,24 @@ sessions.get("/get/:id", async (c) => {
 });
 
 // Delete session
-sessions.delete("/delete/:id", async (c) => {
-  const id = c.req.param("id");
-  const deleted = await SessionService.deleteSession(id);
+sessions.get(
+  "/delete/:id",
+  zValidator(
+    "param",
+    z.object({
+      id: z.string(),
+    })
+  ),
+  async (c) => {
+    const { id } = c.req.valid("param");
+    const deleted = await SessionService.deleteSession(id);
 
-  if (!deleted) {
-    return c.json({ error: "Session not found" }, 404);
+    if (!deleted) {
+      return c.json({ error: "Session not found" }, 404);
+    }
+
+    return c.json({ message: "Session deleted successfully" });
   }
-
-  return c.json({ message: "Session deleted successfully" });
-});
+);
 
 export default sessions;

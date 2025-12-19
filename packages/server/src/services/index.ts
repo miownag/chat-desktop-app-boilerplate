@@ -67,7 +67,9 @@ mockSessions.forEach((session) => {
 export class SessionService {
   static async getSessions(page: number = 1, pageSize: number = 10) {
     // TODO: Get from Postgres
-    const sessionArray = Array.from(sessions.values());
+    const sessionArray = Array.from(sessions.values()).sort((a, b) => {
+      return Number(b.createdAt) - Number(a.createdAt);
+    });
     const total = sessionArray.length;
     const totalPages = Math.ceil(total / pageSize);
     const startIndex = (page - 1) * pageSize;
@@ -86,12 +88,12 @@ export class SessionService {
     return sessions.get(id) || null;
   }
 
-  static async createSession(title?: string): Promise<Session> {
-    const id = Date.now().toString();
-    const now = new Date().toTimeString();
+  static async createSession(title: string): Promise<Session> {
+    const id = crypto.randomUUID();
+    const now = String(new Date().getTime());
     const session: Session = {
       id,
-      title: title || `New Chat ${id}`,
+      title: title,
       createdAt: now,
       updatedAt: now,
       messageCount: 0,
@@ -104,7 +106,9 @@ export class SessionService {
   }
 
   static async deleteSession(id: string): Promise<boolean> {
+    console.log(`Deleting session with id: ${id}`, sessions.has(id));
     const deleted = sessions.delete(id);
+    console.log(`Session deleted: ${id}`, sessions.has(id), deleted);
     messages.delete(id);
     return deleted;
   }

@@ -1,3 +1,4 @@
+import { QueryKeys } from "@/constants";
 import { getSessionList } from "@/services";
 import { useQuery } from "@tanstack/react-query";
 
@@ -9,7 +10,7 @@ function useGetConversationList({
   pageSize: number;
 }) {
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["conversationList", page, pageSize],
+    queryKey: [QueryKeys.CONVERSATION_LIST, page, pageSize],
     queryFn: async () => {
       const response = await getSessionList(page, pageSize);
       return response;

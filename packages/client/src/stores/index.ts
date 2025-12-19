@@ -15,6 +15,9 @@ export const useChatBotStore = create<State & Actions>()(
       }),
     setCurrentConversationId: (id: string | null) =>
       set((state) => {
+        if (id && !state.loadedConversationIds.includes(id)) {
+          state.loadedConversationIds.push(id);
+        }
         state.currentConversationId = id;
       }),
     addNewConversation: () => {

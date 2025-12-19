@@ -41,11 +41,17 @@ interface SenderProps {
   setEnableDeepThink: React.Dispatch<React.SetStateAction<boolean>>;
   enableSearch: boolean;
   setEnableSearch: React.Dispatch<React.SetStateAction<boolean>>;
+  isActive: boolean;
 }
 
 function Sender(props: SenderProps) {
-  const { enableDeepThink, setEnableDeepThink, enableSearch, setEnableSearch } =
-    props;
+  const {
+    enableDeepThink,
+    setEnableDeepThink,
+    enableSearch,
+    setEnableSearch,
+    isActive,
+  } = props;
   const [prompt, setPrompt] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [chatMessages, setChatMessages] = useState(initialMessages);
@@ -79,90 +85,92 @@ function Sender(props: SenderProps) {
   };
 
   return (
-    <div className="bg-background z-10 shrink-0 px-3 pb-3 md:px-5 md:pb-5 w-full">
-      <div className="mx-auto w-2xl">
-        <PromptInput
-          isLoading={isLoading}
-          value={prompt}
-          onValueChange={setPrompt}
-          onSubmit={handleSubmit}
-          className="border-input bg-popover relative z-10 w-full rounded-3xl border p-0 pt-1 shadow-xs"
-        >
-          <div className="flex flex-col">
-            <PromptInputTextarea
-              placeholder="Ask anything"
-              className="pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
-            />
+    isActive && (
+      <div className="bg-background z-10 shrink-0 px-3 pb-3 md:px-5 md:pb-5 w-full">
+        <div className="mx-auto w-2xl">
+          <PromptInput
+            isLoading={isLoading}
+            value={prompt}
+            onValueChange={setPrompt}
+            onSubmit={handleSubmit}
+            className="border-input bg-popover relative z-10 w-full rounded-3xl border p-0 pt-1 shadow-xs"
+          >
+            <div className="flex flex-col">
+              <PromptInputTextarea
+                placeholder="Ask anything"
+                className="pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
+              />
 
-            <PromptInputActions className="mt-5 flex w-full items-center justify-between gap-2 px-3 pb-3">
-              <div className="flex items-center gap-2">
-                <PromptInputAction tooltip="Add a new action">
+              <PromptInputActions className="mt-5 flex w-full items-center justify-between gap-2 px-3 pb-3">
+                <div className="flex items-center gap-2">
+                  <PromptInputAction tooltip="Add a new action">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="size-9 rounded-full cursor-pointer"
+                    >
+                      <LuPlus size={18} />
+                    </Button>
+                  </PromptInputAction>
+
+                  <PromptInputAction tooltip="DeepThink">
+                    <SelectedBtn
+                      label="Deep Think"
+                      icon={<LuBrain size={18} />}
+                      selected={enableDeepThink}
+                      setSelected={setEnableDeepThink}
+                    />
+                  </PromptInputAction>
+
+                  <PromptInputAction tooltip="Search">
+                    <SelectedBtn
+                      label="Search"
+                      icon={<LuGlobe size={18} />}
+                      selected={enableSearch}
+                      setSelected={setEnableSearch}
+                    />
+                  </PromptInputAction>
+
+                  <PromptInputAction tooltip="More actions">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="size-9 rounded-full cursor-pointer"
+                    >
+                      <RiMoreFill size={18} />
+                    </Button>
+                  </PromptInputAction>
+                </div>
+                <div className="flex items-center gap-2">
+                  <PromptInputAction tooltip="Voice input">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="size-9 rounded-full cursor-pointer"
+                    >
+                      <LuMic size={18} />
+                    </Button>
+                  </PromptInputAction>
+
                   <Button
-                    variant="outline"
                     size="icon"
-                    className="size-9 rounded-full cursor-pointer"
+                    disabled={!prompt.trim() || isLoading}
+                    onClick={handleSubmit}
+                    className={`size-9 rounded-full cursor-pointer`}
                   >
-                    <LuPlus size={18} />
+                    {!isLoading ? (
+                      <LuSend size={18} />
+                    ) : (
+                      <span className="size-3 rounded-xs bg-white" />
+                    )}
                   </Button>
-                </PromptInputAction>
-
-                <PromptInputAction tooltip="DeepThink">
-                  <SelectedBtn
-                    label="Deep Think"
-                    icon={<LuBrain size={18} />}
-                    selected={enableDeepThink}
-                    setSelected={setEnableDeepThink}
-                  />
-                </PromptInputAction>
-
-                <PromptInputAction tooltip="Search">
-                  <SelectedBtn
-                    label="Search"
-                    icon={<LuGlobe size={18} />}
-                    selected={enableSearch}
-                    setSelected={setEnableSearch}
-                  />
-                </PromptInputAction>
-
-                <PromptInputAction tooltip="More actions">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="size-9 rounded-full cursor-pointer"
-                  >
-                    <RiMoreFill size={18} />
-                  </Button>
-                </PromptInputAction>
-              </div>
-              <div className="flex items-center gap-2">
-                <PromptInputAction tooltip="Voice input">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="size-9 rounded-full cursor-pointer"
-                  >
-                    <LuMic size={18} />
-                  </Button>
-                </PromptInputAction>
-
-                <Button
-                  size="icon"
-                  disabled={!prompt.trim() || isLoading}
-                  onClick={handleSubmit}
-                  className={`size-9 rounded-full cursor-pointer`}
-                >
-                  {!isLoading ? (
-                    <LuSend size={18} />
-                  ) : (
-                    <span className="size-3 rounded-xs bg-white" />
-                  )}
-                </Button>
-              </div>
-            </PromptInputActions>
-          </div>
-        </PromptInput>
+                </div>
+              </PromptInputActions>
+            </div>
+          </PromptInput>
+        </div>
       </div>
-    </div>
+    )
   );
 }
 

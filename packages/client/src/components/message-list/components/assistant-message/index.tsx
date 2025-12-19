@@ -81,7 +81,10 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
               <AiOutlineSync />
             </Button>
           </MessageAction>
-          <MessageAction tooltip="Copy" delayDuration={100}>
+          <MessageAction
+            tooltip={copied ? "Copied!" : "Copy"}
+            delayDuration={100}
+          >
             {!copied ? (
               <Button
                 variant="ghost"
