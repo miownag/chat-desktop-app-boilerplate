@@ -1,5 +1,5 @@
-import { TextShimmer } from "@/components/ui/text-shimmer";
 import { cn } from "@/lib/utils";
+import Typewriter from "../typewriter";
 
 function Welcome(props: { className?: string }) {
   return (
@@ -14,9 +14,14 @@ function Welcome(props: { className?: string }) {
         alt="Hello"
         className="w-30 h-30 mb-4"
       />
-      <TextShimmer className="text-lg" duration={2.5} spread={5}>
-        Hello, I'm Bricks. May I help you?
-      </TextShimmer>
+      <Typewriter
+        text="Hello, I'm Bricks. May I help you?"
+        delay={100}
+        className="text-lg font-mono bg-linear-to-r from-orange-800 to-blue-800 bg-clip-text text-transparent"
+        cursorClassName="bg-neutral-700 w-0.5 h-5"
+        deleteEndIndex={18}
+        loop
+      />
     </div>
   );
 }
