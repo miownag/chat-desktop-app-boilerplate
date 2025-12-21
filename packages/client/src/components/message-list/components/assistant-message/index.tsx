@@ -1,4 +1,3 @@
-import type { ChatMessage } from "@/components/message-list";
 import { Button } from "@/components/ui/button";
 import {
   Message,
@@ -7,6 +6,7 @@ import {
   MessageAvatar,
   MessageContent,
 } from "@/components/ui/message";
+import { Message as MessageType } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { AiOutlineSync } from "react-icons/ai";
@@ -20,7 +20,7 @@ import {
 } from "react-icons/ri";
 
 interface AssistantMessageProps {
-  message: ChatMessage;
+  message: MessageType;
   isLastMessage?: boolean;
 }
 
@@ -51,6 +51,10 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
     }
   };
 
+  const handleOnRegenerate = () => {
+    // TODO: send and update
+  };
+
   return (
     <Message
       key={message.id}
@@ -72,15 +76,18 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
             isLastMessage && "opacity-100"
           )}
         >
-          <MessageAction tooltip="Re-Generate" delayDuration={100}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full cursor-pointer"
-            >
-              <AiOutlineSync />
-            </Button>
-          </MessageAction>
+          {isLastMessage && (
+            <MessageAction tooltip="Re-Generate" delayDuration={100}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full cursor-pointer"
+                onClick={handleOnRegenerate}
+              >
+                <AiOutlineSync />
+              </Button>
+            </MessageAction>
+          )}
           <MessageAction
             tooltip={copied ? "Copied!" : "Copy"}
             delayDuration={100}

@@ -73,8 +73,6 @@ function ConversationList({ setAlertId, setAlertOpen }: ConversationListProps) {
     pick(state, [
       "currentConversationId",
       "setCurrentConversationId",
-      "addNewConversation",
-      "setCurrentConversationId",
       "addLoadedConversationIds",
     ])
   );
@@ -86,8 +84,6 @@ function ConversationList({ setAlertId, setAlertOpen }: ConversationListProps) {
     page: pageConfig.page,
     pageSize: pageConfig.pageSize,
   });
-
-  console.log("==========>", data);
 
   const checkoutConversation = (id: string) => {
     // 注意：keep alive

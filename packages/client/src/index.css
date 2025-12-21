@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.gradient-text {
+  @apply bg-linear-to-r from-blue-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent;
+}
+
 * {
   box-sizing: border-box;
 }

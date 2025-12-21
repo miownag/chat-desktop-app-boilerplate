@@ -9,6 +9,7 @@ function useGetMessages({ conversationId }: { conversationId: string }) {
       const response = await getMessagesById(conversationId);
       return response;
     },
+    enabled: Boolean(conversationId) && conversationId !== "new",
   });
 }
 

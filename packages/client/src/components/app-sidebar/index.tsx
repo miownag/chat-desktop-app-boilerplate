@@ -7,12 +7,11 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
-import AlertDialogConfirm from "../alert-confirm";
-import Space from "../space";
-import { Button } from "../ui/button";
+import AlertDialogConfirm from "@/components/alert-confirm";
+import Space from "@/components/space";
+import { Button } from "@/components/ui/button";
 import "./index.css";
-import ConversationList from "../conversation-list";
-import useCreateConversation from "@/hooks/apis/use-create-conversation";
+import ConversationList from "@/components/conversation-list";
 import useDeleteConversation from "@/hooks/apis/use-delete-conversation";
 import { toast } from "sonner";
 import { useShallowChatBotStore } from "@/stores";
@@ -34,7 +33,10 @@ function AppSidebar() {
         }
       },
     });
-  const { mutateAsync: createConversation } = useCreateConversation();
+
+  const handleCreateChat = async () => {
+    setCurrentConversationId("new");
+  };
 
   return (
     <Sidebar className="px-0.5 py-1">
@@ -56,7 +58,7 @@ function AppSidebar() {
         <div className="flex items-center justify-between">
           <Space gap={3}>
             <img src="/bricks.png" alt="Bricks" className="w-8 h-8" />
-            <div className="font-bold font-mono text-lg bg-linear-to-r from-orange-500 to-blue-500 bg-clip-text text-transparent">
+            <div className="font-bold font-mono text-lg gradient-text">
               Bricks
             </div>
           </Space>
@@ -74,10 +76,7 @@ function AppSidebar() {
         <Button
           variant="outline"
           className="mt-3 cursor-pointer"
-          onClick={async () => {
-            const { data } = await createConversation("New Chat");
-            data?.id && setCurrentConversationId(data.id);
-          }}
+          onClick={handleCreateChat}
         >
           <MdAdd />
           New Chat

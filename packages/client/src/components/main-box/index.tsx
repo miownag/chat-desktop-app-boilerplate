@@ -1,7 +1,11 @@
 import MessageList from "@/components/message-list";
 import Sender from "@/components/sender";
+import useGetMessages from "@/hooks/apis/use-get-messages";
+import useChat from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useShallowChatBotStore } from "@/stores";
+import { pick } from "es-toolkit";
 
 function MainBox({
   conversationId,
@@ -12,6 +16,69 @@ function MainBox({
 }) {
   const [enableDeepThink, setEnableDeepThink] = useState(false);
   const [enableSearch, setEnableSearch] = useState(false);
+  const { pendingMessage, setPendingMessage } = useShallowChatBotStore(
+    (state) => pick(state, ["pendingMessage", "setPendingMessage"])
+  );
+
+  const { isRequesting, onRequest, messages, setMessages, abort } = useChat({
+    requestFn: (messages, enableDeepThink, enableSearch, signal) => {
+      console.log("params", {
+        messages,
+        enableDeepThink,
+        enableSearch,
+        signal,
+      });
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            id: Date.now().toString(),
+            content: "这是模拟的回复内容",
+            role: "assistant",
+          });
+        }, 1000);
+      });
+    },
+  });
+  const { data, isSuccess } = useGetMessages({
+    conversationId,
+  });
+
+  // Set initial messages
+  useEffect(() => {
+    if (pendingMessage) {
+      // If there is a pending message, must be a new conversation
+      return;
+    }
+    if (isSuccess && data?.data?.data?.length > 0) {
+      setMessages(data.data.data);
+    }
+  }, [isSuccess, data?.data?.data, setMessages, pendingMessage]);
+
+  // 当组件挂载且有pendingMessage时，自动发送消息
+  useEffect(() => {
+    if (isActive && pendingMessage && conversationId !== "new") {
+      // Add user message immediately
+      const newUserMessage = {
+        id: `msg-${crypto.randomUUID()}`,
+        role: "user",
+        content: pendingMessage,
+      };
+      setPendingMessage(null);
+      onRequest({
+        message: newUserMessage,
+        enableDeepThink,
+        enableSearch,
+      });
+    }
+  }, [
+    isActive,
+    pendingMessage,
+    conversationId,
+    onRequest,
+    enableDeepThink,
+    enableSearch,
+    setPendingMessage,
+  ]);
 
   return (
     <div
@@ -20,13 +87,16 @@ function MainBox({
         isActive ? "" : "hidden"
       )}
     >
-      <MessageList conversationId={conversationId} isActive={isActive} />
+      <MessageList isActive={isActive} messages={messages} />
       <Sender
         enableDeepThink={enableDeepThink}
         setEnableDeepThink={setEnableDeepThink}
         enableSearch={enableSearch}
         setEnableSearch={setEnableSearch}
         isActive={isActive}
+        onRequest={onRequest}
+        isRequesting={isRequesting}
+        abort={abort}
       />
     </div>
   );

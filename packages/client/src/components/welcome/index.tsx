@@ -17,10 +17,11 @@ function Welcome(props: { className?: string }) {
       <Typewriter
         text="Hello, I'm Bricks. May I help you?"
         delay={100}
-        className="text-lg font-mono bg-linear-to-r from-orange-800 to-blue-800 bg-clip-text text-transparent"
+        className="text-lg font-mono gradient-text"
         cursorClassName="bg-neutral-700 w-0.5 h-5"
         deleteEndIndex={18}
         loop
+        loopDelay={2000}
       />
     </div>
   );

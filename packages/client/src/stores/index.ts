@@ -9,6 +9,7 @@ export const useChatBotStore = create<State & Actions>()(
     currentConversationId: null,
     conversationList: [],
     loadedConversationIds: [],
+    pendingMessage: null,
     toggleSideBar: () =>
       set((state) => {
         state.sideBarVisible = !state.sideBarVisible;
@@ -20,10 +21,6 @@ export const useChatBotStore = create<State & Actions>()(
         }
         state.currentConversationId = id;
       }),
-    addNewConversation: () => {
-      // TODO: 新建会话
-      console.log("add new conversation");
-    },
     addLoadedConversationIds: (ids: string[]) =>
       set((state) => {
         ids.forEach((id) => {
@@ -31,6 +28,10 @@ export const useChatBotStore = create<State & Actions>()(
             state.loadedConversationIds.push(id);
           }
         });
+      }),
+    setPendingMessage: (message: string | null) =>
+      set((state) => {
+        state.pendingMessage = message;
       }),
   }))
 );

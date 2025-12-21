@@ -4,12 +4,21 @@ type Message = {
   id: string | number;
   role: string;
   content: string;
+  feedback?: "liked" | "disliked";
+};
+
+type OnRequestParams<TMessage extends Message> = {
+  message: TMessage;
+  enableDeepThink: boolean;
+  enableSearch: boolean;
 };
 
 type UseChatOptions<TMessage extends Message, TParsedMessage> = {
   // Request function that sends messages to the server
   requestFn: (
-    messages: TMessage[],
+    messages: TMessage,
+    enableDeepThink: boolean,
+    enableSearch: boolean,
     signal: AbortSignal
   ) => Promise<TMessage | TMessage[]>;
   // Initial history messages
@@ -28,7 +37,7 @@ type UseChatReturn<TMessage extends Message, TParsedMessage> = {
   // Transformed messages using the provided transformer
   parsedMessages: TParsedMessage[];
   // Trigger a request with optional new message
-  onRequest: (newMessage?: TMessage) => Promise<void>;
+  onRequest: (params: OnRequestParams<TMessage>) => Promise<void>;
   // Directly set messages without triggering a request
   setMessages: React.Dispatch<React.SetStateAction<TMessage[]>>;
 };
@@ -53,7 +62,8 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
 
   // Trigger a request with optional new message
   const onRequest = useCallback(
-    async (newMessage?: TMessage) => {
+    async (params: OnRequestParams<TMessage>) => {
+      const { message, enableDeepThink, enableSearch } = params;
       // Abort any existing request
       abort();
 
@@ -63,18 +73,25 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
 
       // Add new message to the list if provided
       let currentMessages = messages;
-      if (newMessage) {
-        currentMessages = [...messages, newMessage];
+      if (message) {
+        currentMessages = [...messages, message];
         setMessages(currentMessages);
       }
 
       setIsRequesting(true);
 
       try {
-        const response = await requestFn(currentMessages, controller.signal);
+        const response = await requestFn(
+          message,
+          enableDeepThink,
+          enableSearch,
+          controller.signal
+        );
 
         // Handle response - can be single message or array
-        const responseMessages = Array.isArray(response) ? response : [response];
+        const responseMessages = Array.isArray(response)
+          ? response
+          : [response];
 
         setMessages((prev) => [...prev, ...responseMessages]);
       } catch (error) {
@@ -105,5 +122,7 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
     setMessages,
   };
 }
+
+export type { Message, OnRequestParams };
 
 export default useChat;

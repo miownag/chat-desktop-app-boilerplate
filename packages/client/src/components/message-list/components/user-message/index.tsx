@@ -1,4 +1,3 @@
-import type { ChatMessage } from "@/components/message-list";
 import { Button } from "@/components/ui/button";
 import {
   Message,
@@ -7,13 +6,14 @@ import {
   MessageAvatar,
   MessageContent,
 } from "@/components/ui/message";
+import { Message as MessageType } from "@/hooks/use-chat";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { LuCopy } from "react-icons/lu";
 import { MdCheck } from "react-icons/md";
 
 interface UserMessageProps {
-  message: ChatMessage;
+  message: MessageType;
 }
 
 function UserMessage({ message }: UserMessageProps) {

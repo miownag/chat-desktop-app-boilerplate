@@ -3,8 +3,8 @@ import { ChatContainerContent, ChatContainerRoot } from "../ui/chat-container";
 import { ScrollButton } from "../ui/scroll-button";
 import AssistantMessage from "./components/assistant-message";
 import UserMessage from "./components/user-message";
-import useGetMessages from "@/hooks/apis/use-get-messages";
 import Welcome from "../welcome";
+import { Message } from "@/hooks/use-chat";
 
 export type ChatMessage = {
   id: number;
@@ -14,35 +14,33 @@ export type ChatMessage = {
 };
 
 interface MessageListProps {
-  conversationId: string;
+  messages: Message[];
   isActive: boolean;
 }
 
-function MessageList({ conversationId, isActive }: MessageListProps) {
+function MessageList({ messages, isActive }: MessageListProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const { data } = useGetMessages({
-    conversationId,
-  });
 
   if (!isActive) {
     return null;
   }
 
-  return data?.data?.data?.length > 0 ? (
+  return messages.length > 0 ? (
     <div
       ref={chatContainerRef}
       className="relative flex-1 overflow-y-auto w-2xl"
     >
       <ChatContainerRoot className="h-full">
         <ChatContainerContent className="space-y-0 px-5 py-12">
-          {data?.data?.data?.map((message: ChatMessage, index: number) =>
+          {messages.map((message: Message, index: number) =>
             message.role === "assistant" ? (
               <AssistantMessage
+                key={message.id}
                 message={message}
-                isLastMessage={index === data?.data?.data?.length - 1}
+                isLastMessage={index === messages.length - 1}
               />
             ) : (
-              <UserMessage message={message} />
+              <UserMessage key={message.id} message={message} />
             )
           )}
         </ChatContainerContent>

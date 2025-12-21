@@ -106,9 +106,7 @@ export class SessionService {
   }
 
   static async deleteSession(id: string): Promise<boolean> {
-    console.log(`Deleting session with id: ${id}`, sessions.has(id));
     const deleted = sessions.delete(id);
-    console.log(`Session deleted: ${id}`, sessions.has(id), deleted);
     messages.delete(id);
     return deleted;
   }

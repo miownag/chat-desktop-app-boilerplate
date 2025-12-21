@@ -8,33 +8,11 @@ import { Button } from "@/components/ui/button";
 import { LuBrain, LuGlobe, LuMic, LuPlus, LuSend } from "react-icons/lu";
 import { RiMoreFill } from "react-icons/ri";
 import { useState } from "react";
-import SelectedBtn from "../selected-btn";
-
-// Initial chat messages
-const initialMessages = [
-  {
-    id: 1,
-    role: "user",
-    content: "Hello! Can you help me with a coding question?",
-  },
-  {
-    id: 2,
-    role: "assistant",
-    content:
-      "Of course! I'd be happy to help with your coding question. What would you like to know?",
-  },
-  {
-    id: 3,
-    role: "user",
-    content: "How do I create a responsive layout with CSS Grid?",
-  },
-  {
-    id: 4,
-    role: "assistant",
-    content:
-      "Creating a responsive layout with CSS Grid is straightforward. Here's a basic example:\n\n```css\n.container {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n  gap: 1rem;\n}\n```\n\nThis creates a grid where:\n- Columns automatically fit as many as possible\n- Each column is at least 250px wide\n- Columns expand to fill available space\n- There's a 1rem gap between items\n\nWould you like me to explain more about how this works?",
-  },
-];
+import SelectedBtn from "@/components/selected-btn";
+import { Message, OnRequestParams } from "@/hooks/use-chat";
+import useCreateConversation from "@/hooks/apis/use-create-conversation";
+import { useShallowChatBotStore } from "@/stores";
+import { pick } from "es-toolkit";
 
 interface SenderProps {
   enableDeepThink: boolean;
@@ -42,6 +20,9 @@ interface SenderProps {
   enableSearch: boolean;
   setEnableSearch: React.Dispatch<React.SetStateAction<boolean>>;
   isActive: boolean;
+  onRequest: (params: OnRequestParams<Message>) => void;
+  isRequesting: boolean;
+  abort: () => void;
 }
 
 function Sender(props: SenderProps) {
@@ -51,37 +32,49 @@ function Sender(props: SenderProps) {
     enableSearch,
     setEnableSearch,
     isActive,
+    onRequest,
+    isRequesting,
+    abort,
   } = props;
   const [prompt, setPrompt] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [chatMessages, setChatMessages] = useState(initialMessages);
+  const { currentConversationId, setCurrentConversationId, setPendingMessage } =
+    useShallowChatBotStore((state) =>
+      pick(state, [
+        "currentConversationId",
+        "setCurrentConversationId",
+        "setPendingMessage",
+      ])
+    );
+  const { mutateAsync: createConversationAndSend } = useCreateConversation({
+    onSuccess: (params) => {
+      setCurrentConversationId(params.data.id);
+    },
+  });
 
   const handleSubmit = () => {
     if (!prompt.trim()) return;
-
+    const trimmedPrompt = prompt.trim();
     setPrompt("");
-    setIsLoading(true);
+
+    if (currentConversationId === "new") {
+      // 保存用户输入的内容到状态管理
+      setPendingMessage(trimmedPrompt);
+      createConversationAndSend();
+      return;
+    }
 
     // Add user message immediately
     const newUserMessage = {
-      id: chatMessages.length + 1,
+      id: `msg-${crypto.randomUUID()}`,
       role: "user",
-      content: prompt.trim(),
+      content: trimmedPrompt,
     };
 
-    setChatMessages([...chatMessages, newUserMessage]);
-
-    // Simulate API response
-    setTimeout(() => {
-      const assistantResponse = {
-        id: chatMessages.length + 2,
-        role: "assistant",
-        content: `This is a response to: "${prompt.trim()}"`,
-      };
-
-      setChatMessages((prev) => [...prev, assistantResponse]);
-      setIsLoading(false);
-    }, 1500);
+    onRequest({
+      message: newUserMessage,
+      enableDeepThink,
+      enableSearch,
+    });
   };
 
   return (
@@ -89,7 +82,7 @@ function Sender(props: SenderProps) {
       <div className="bg-background z-10 shrink-0 px-3 pb-3 md:px-5 md:pb-5 w-full">
         <div className="mx-auto w-2xl">
           <PromptInput
-            isLoading={isLoading}
+            isLoading={isRequesting}
             value={prompt}
             onValueChange={setPrompt}
             onSubmit={handleSubmit}
@@ -99,6 +92,7 @@ function Sender(props: SenderProps) {
               <PromptInputTextarea
                 placeholder="Ask anything"
                 className="pt-3 pl-4 text-base leading-[1.3] sm:text-base md:text-base"
+                autoFocus
               />
 
               <PromptInputActions className="mt-5 flex w-full items-center justify-between gap-2 px-3 pb-3">
@@ -151,17 +145,19 @@ function Sender(props: SenderProps) {
                       <LuMic size={18} />
                     </Button>
                   </PromptInputAction>
-
                   <Button
                     size="icon"
-                    disabled={!prompt.trim() || isLoading}
+                    disabled={!prompt.trim() && !isRequesting}
                     onClick={handleSubmit}
                     className={`size-9 rounded-full cursor-pointer`}
                   >
-                    {!isLoading ? (
+                    {!isRequesting ? (
                       <LuSend size={18} />
                     ) : (
-                      <span className="size-3 rounded-xs bg-white" />
+                      <span
+                        className="size-3 rounded-xs bg-white"
+                        onClick={abort}
+                      />
                     )}
                   </Button>
                 </div>
