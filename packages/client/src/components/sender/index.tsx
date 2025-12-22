@@ -11,6 +11,7 @@ import {
   PromptInputTextarea,
 } from '@/components/ui/prompt-input';
 import useCreateConversation from '@/hooks/apis/use-create-conversation';
+import { useRefreshConversationList } from '@/hooks/apis/use-get-conversation-list';
 import type { Message, OnRequestParams } from '@/hooks/use-chat';
 import { useShallowChatBotStore } from '@/stores';
 
@@ -45,13 +46,10 @@ function Sender(props: SenderProps) {
         'setPendingMessage',
       ]),
     );
-  const { mutateAsync: createConversationAndSend } = useCreateConversation({
-    onSuccess: (params) => {
-      setCurrentConversationId(params.data.id);
-    },
-  });
+  const { mutateAsync: createConversationAndSend } = useCreateConversation();
+  const refreshConversationList = useRefreshConversationList();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!prompt.trim()) return;
     const trimmedPrompt = prompt.trim();
     setPrompt('');
@@ -59,7 +57,11 @@ function Sender(props: SenderProps) {
     if (currentConversationId === 'new') {
       // 保存用户输入的内容到状态管理
       setPendingMessage(trimmedPrompt);
-      createConversationAndSend();
+      const { data } = await createConversationAndSend();
+      if (data.id) {
+        await refreshConversationList();
+        setCurrentConversationId(data.id);
+      }
       return;
     }
 

@@ -17,10 +17,10 @@ function useCreateConversation(config?: {
   return useMutation({
     mutationFn: () => createConversation(),
     onSuccess: (params) => {
-      config?.onSuccess?.(params);
       queryClient.invalidateQueries({
         queryKey: [QueryKeys.CONVERSATION_LIST],
       });
+      config?.onSuccess?.(params);
     },
   });
 }

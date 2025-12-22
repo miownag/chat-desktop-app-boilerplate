@@ -9,7 +9,6 @@ function useGetConversationList({
   page: number;
   pageSize: number;
 }) {
-  const queryClient = useQueryClient();
   const { data, isLoading, isError } = useQuery({
     queryKey: [QueryKeys.CONVERSATION_LIST, page, pageSize],
     queryFn: async () => {
@@ -18,18 +17,22 @@ function useGetConversationList({
     },
   });
 
-  const refreshConversationList = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: [QueryKeys.CONVERSATION_LIST, page, pageSize],
-    });
-  };
-
   return {
     data,
     isLoading,
     isError,
-    refreshConversationList,
   };
 }
 
+function useRefreshConversationList() {
+  const queryClient = useQueryClient();
+  const refreshConversationList = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: [QueryKeys.CONVERSATION_LIST],
+    });
+  };
+  return refreshConversationList;
+}
+
+export { useRefreshConversationList };
 export default useGetConversationList;
