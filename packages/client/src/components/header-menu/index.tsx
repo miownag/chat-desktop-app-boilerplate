@@ -1,15 +1,15 @@
-import { TbMessagePlus } from "react-icons/tb";
-import { PiSidebar } from "react-icons/pi";
-import { useChatBotStore } from "@/stores";
-import AccountManage from "../account-manage";
-import Space from "../space";
-import { Button } from "../ui/button";
-import { useSidebar } from "../ui/sidebar";
+import { PiSidebar } from 'react-icons/pi';
+import { TbMessagePlus } from 'react-icons/tb';
+import { useChatBotStore } from '@/stores';
+import AccountManage from '../account-manage';
+import Space from '../space';
+import { Button } from '../ui/button';
+import { useSidebar } from '../ui/sidebar';
 
 function HeaderMenu() {
   const { toggleSidebar, open } = useSidebar();
-  const addNewConversation = useChatBotStore(
-    (state) => state.addNewConversation
+  const setCurrentConversationId = useChatBotStore(
+    (state) => state.setCurrentConversationId,
   );
 
   return (
@@ -28,7 +28,7 @@ function HeaderMenu() {
             size="icon"
             variant="ghost"
             className="cursor-pointer"
-            onClick={addNewConversation}
+            onClick={() => setCurrentConversationId('new')}
           >
             <TbMessagePlus className="w-5! h-5! text-neutral-500" />
           </Button>

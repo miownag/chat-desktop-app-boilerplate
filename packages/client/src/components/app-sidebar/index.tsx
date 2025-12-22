@@ -1,21 +1,21 @@
-import { useState } from "react";
-import { MdAdd } from "react-icons/md";
-import { PiSidebar } from "react-icons/pi";
+import { useState } from 'react';
+import { MdAdd } from 'react-icons/md';
+import { PiSidebar } from 'react-icons/pi';
+import AlertDialogConfirm from '@/components/alert-confirm';
+import Space from '@/components/space';
+import { Button } from '@/components/ui/button';
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
   useSidebar,
-} from "@/components/ui/sidebar";
-import AlertDialogConfirm from "@/components/alert-confirm";
-import Space from "@/components/space";
-import { Button } from "@/components/ui/button";
-import "./index.css";
-import ConversationList from "@/components/conversation-list";
-import useDeleteConversation from "@/hooks/apis/use-delete-conversation";
-import { toast } from "sonner";
-import { useShallowChatBotStore } from "@/stores";
-import { pick } from "es-toolkit";
+} from '@/components/ui/sidebar';
+import './index.css';
+import { pick } from 'es-toolkit';
+import { toast } from 'sonner';
+import ConversationList from '@/components/conversation-list';
+import useDeleteConversation from '@/hooks/apis/use-delete-conversation';
+import { useShallowChatBotStore } from '@/stores';
 
 function AppSidebar() {
   const { open, toggleSidebar } = useSidebar();
@@ -23,7 +23,7 @@ function AppSidebar() {
   const [alertId, setAlertId] = useState<string | null>(null);
   const { currentConversationId, setCurrentConversationId } =
     useShallowChatBotStore((state) =>
-      pick(state, ["currentConversationId", "setCurrentConversationId"])
+      pick(state, ['currentConversationId', 'setCurrentConversationId']),
     );
   const { mutateAsync: deleteConversation, isSuccess: isDeleteSuccess } =
     useDeleteConversation({
@@ -35,7 +35,7 @@ function AppSidebar() {
     });
 
   const handleCreateChat = async () => {
-    setCurrentConversationId("new");
+    setCurrentConversationId('new');
   };
 
   return (
@@ -46,9 +46,9 @@ function AppSidebar() {
         open={alertOpen}
         setOpen={setAlertOpen}
         onConfirm={async () => {
-          await deleteConversation(alertId || "");
+          await deleteConversation(alertId || '');
           if (isDeleteSuccess) {
-            toast.success("Conversation deleted successfully");
+            toast.success('Conversation deleted successfully');
           }
           setAlertOpen(false);
           setAlertId(null);

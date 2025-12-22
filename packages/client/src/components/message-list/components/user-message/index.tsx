@@ -1,16 +1,16 @@
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { LuCopy } from 'react-icons/lu';
+import { MdCheck } from 'react-icons/md';
+import { Button } from '@/components/ui/button';
 import {
   Message,
   MessageAction,
   MessageActions,
   MessageAvatar,
   MessageContent,
-} from "@/components/ui/message";
-import { Message as MessageType } from "@/hooks/use-chat";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { LuCopy } from "react-icons/lu";
-import { MdCheck } from "react-icons/md";
+} from '@/components/ui/message';
+import type { Message as MessageType } from '@/hooks/use-chat';
+import { cn } from '@/lib/utils';
 
 interface UserMessageProps {
   message: MessageType;
@@ -27,7 +27,7 @@ function UserMessage({ message }: UserMessageProps) {
         setCopied(false);
       }, 2000);
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      console.error('Failed to copy text: ', err);
     }
   };
 
@@ -44,10 +44,10 @@ function UserMessage({ message }: UserMessageProps) {
           </MessageContent>
         </div>
         <MessageActions
-          className={cn("mr-10 flex gap-0 opacity-0 group-hover:opacity-100")}
+          className={cn('mr-10 flex gap-0 opacity-0 group-hover:opacity-100')}
         >
           <MessageAction
-            tooltip={copied ? "Copied!" : "Copy"}
+            tooltip={copied ? 'Copied!' : 'Copy'}
             delayDuration={100}
           >
             {!copied ? (

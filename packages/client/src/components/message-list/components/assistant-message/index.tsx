@@ -1,23 +1,23 @@
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { AiOutlineSync } from 'react-icons/ai';
+import { LuCopy } from 'react-icons/lu';
+import { MdCheck } from 'react-icons/md';
+import {
+  RiThumbDownFill,
+  RiThumbDownLine,
+  RiThumbUpFill,
+  RiThumbUpLine,
+} from 'react-icons/ri';
+import { Button } from '@/components/ui/button';
 import {
   Message,
   MessageAction,
   MessageActions,
   MessageAvatar,
   MessageContent,
-} from "@/components/ui/message";
-import { Message as MessageType } from "@/hooks/use-chat";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { AiOutlineSync } from "react-icons/ai";
-import { LuCopy } from "react-icons/lu";
-import { MdCheck } from "react-icons/md";
-import {
-  RiThumbUpFill,
-  RiThumbUpLine,
-  RiThumbDownFill,
-  RiThumbDownLine,
-} from "react-icons/ri";
+} from '@/components/ui/message';
+import type { Message as MessageType } from '@/hooks/use-chat';
+import { cn } from '@/lib/utils';
 
 interface AssistantMessageProps {
   message: MessageType;
@@ -35,15 +35,15 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
         setCopied(false);
       }, 2000);
     } catch (err) {
-      console.error("Failed to copy text: ", err);
+      console.error('Failed to copy text: ', err);
     }
   };
 
-  const handleFeedback = (actionType: "like" | "dislike") => {
+  const handleFeedback = (actionType: 'like' | 'dislike') => {
     const status = message.feedback;
     if (
-      (status === "liked" && actionType == "like") ||
-      (status === "disliked" && actionType == "dislike")
+      (status === 'liked' && actionType === 'like') ||
+      (status === 'disliked' && actionType === 'dislike')
     ) {
       // TODO: cancel and update
     } else {
@@ -72,8 +72,8 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
         </div>
         <MessageActions
           className={cn(
-            "ml-10 flex gap-0 opacity-0 group-hover:opacity-100",
-            isLastMessage && "opacity-100"
+            'ml-10 flex gap-0 opacity-0 group-hover:opacity-100',
+            isLastMessage && 'opacity-100',
           )}
         >
           {isLastMessage && (
@@ -89,7 +89,7 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
             </MessageAction>
           )}
           <MessageAction
-            tooltip={copied ? "Copied!" : "Copy"}
+            tooltip={copied ? 'Copied!' : 'Copy'}
             delayDuration={100}
           >
             {!copied ? (
@@ -116,9 +116,9 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
               variant="ghost"
               size="icon"
               className="rounded-full cursor-pointer"
-              onClick={() => handleFeedback("like")}
+              onClick={() => handleFeedback('like')}
             >
-              {message.feedback === "liked" ? (
+              {message.feedback === 'liked' ? (
                 <RiThumbUpFill />
               ) : (
                 <RiThumbUpLine />
@@ -130,9 +130,9 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
               variant="ghost"
               size="icon"
               className="rounded-full cursor-pointer"
-              onClick={() => handleFeedback("dislike")}
+              onClick={() => handleFeedback('dislike')}
             >
-              {message.feedback === "disliked" ? (
+              {message.feedback === 'disliked' ? (
                 <RiThumbDownFill />
               ) : (
                 <RiThumbDownLine />

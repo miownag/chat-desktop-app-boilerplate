@@ -1,24 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
-import MainBox from "@/components/main-box";
-import { useShallowChatBotStore } from "@/stores";
-import { pick } from "es-toolkit";
+import { createFileRoute } from '@tanstack/react-router';
+import { pick } from 'es-toolkit';
+import MainBox from '@/components/main-box';
+import { useShallowChatBotStore } from '@/stores';
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute('/')({
   component: IndexComponent,
 });
 
 function IndexComponent() {
   const { loadedConversationIds, currentConversationId } =
     useShallowChatBotStore((state) =>
-      pick(state, ["loadedConversationIds", "currentConversationId"])
+      pick(state, ['loadedConversationIds', 'currentConversationId']),
     );
   return (
     <>
-      {(!loadedConversationIds?.length || currentConversationId === "new") && (
+      {(!loadedConversationIds?.length || currentConversationId === 'new') && (
         <MainBox conversationId="new" isActive />
       )}
       {loadedConversationIds
-        ?.filter((id) => id !== "new")
+        ?.filter((id) => id !== 'new')
         .map((id) => (
           <MainBox
             key={id}

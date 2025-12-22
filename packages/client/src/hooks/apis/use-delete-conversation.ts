@@ -1,6 +1,6 @@
-import { QueryKeys } from "@/constants";
-import { deleteConversation } from "@/services";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKeys } from '@/constants';
+import { deleteConversation } from '@/services';
 
 function useDeleteConversation(config?: { onSuccess?: () => void }) {
   const queryClient = useQueryClient();

@@ -21,7 +21,10 @@ export default function AccountManage() {
       <DropdownMenuTrigger asChild>
         <div className="cursor-pointer flex items-center gap-1 pl-2 py-1 rounded-lg hover:bg-neutral-100 transition-colors">
           <Avatar>
-            <AvatarImage src="https://github.com/shadcn.png" alt="@evilrabbit" />
+            <AvatarImage
+              src="https://github.com/shadcn.png"
+              alt="@evilrabbit"
+            />
             <AvatarFallback>ER</AvatarFallback>
           </Avatar>
           <MdOutlineArrowDropDown className="text-2xl" />

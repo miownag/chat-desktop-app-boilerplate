@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { immer } from "zustand/middleware/immer";
-import { useShallow } from "zustand/react/shallow";
-import type { Actions, State } from "./types";
+import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
+import { useShallow } from 'zustand/react/shallow';
+import type { Actions, State } from './types';
 
 export const useChatBotStore = create<State & Actions>()(
   immer((set) => ({
@@ -33,11 +33,11 @@ export const useChatBotStore = create<State & Actions>()(
       set((state) => {
         state.pendingMessage = message;
       }),
-  }))
+  })),
 );
 
 export const useShallowChatBotStore = <TSelected>(
-  selector: (state: State & Actions) => TSelected
+  selector: (state: State & Actions) => TSelected,
 ): TSelected => {
   return useChatBotStore(useShallow(selector));
 };

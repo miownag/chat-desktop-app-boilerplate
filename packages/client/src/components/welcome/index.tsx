@@ -1,12 +1,12 @@
-import { cn } from "@/lib/utils";
-import Typewriter from "../typewriter";
+import { cn } from '@/lib/utils';
+import Typewriter from '../typewriter';
 
 function Welcome(props: { className?: string }) {
   return (
     <div
       className={cn(
-        "w-2xl flex flex-col items-center justify-center mb-8  -mt-30",
-        props.className
+        'w-2xl flex flex-col items-center justify-center mb-8  -mt-30',
+        props.className,
       )}
     >
       <img

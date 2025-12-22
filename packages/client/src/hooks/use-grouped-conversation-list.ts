@@ -1,8 +1,8 @@
-import useGetConversationList from "./apis/use-get-conversation-list";
-import { groupBy, pick } from "es-toolkit";
-import dayjs from "dayjs";
-import { useShallowChatBotStore } from "@/stores";
-import { useEffect } from "react";
+import dayjs from 'dayjs';
+import { groupBy, pick } from 'es-toolkit';
+import { useEffect } from 'react';
+import { useShallowChatBotStore } from '@/stores';
+import useGetConversationList from './apis/use-get-conversation-list';
 
 function useGroupedConversationList(pageConfig: {
   pageSize: number;
@@ -15,27 +15,34 @@ function useGroupedConversationList(pageConfig: {
     addLoadedConversationIds,
   } = useShallowChatBotStore((state) =>
     pick(state, [
-      "currentConversationId",
-      "setCurrentConversationId",
-      "addLoadedConversationIds",
-    ])
+      'currentConversationId',
+      'setCurrentConversationId',
+      'addLoadedConversationIds',
+    ]),
   );
   useEffect(() => {
     if (
-      data?.data?.data &&
+      data?.data?.data?.length &&
+      currentConversationId !== 'new' &&
       (!currentConversationId ||
         !data.data.data.map((item) => item.id).includes(currentConversationId))
     ) {
       setCurrentConversationId(data.data.data[0].id);
       addLoadedConversationIds([data.data.data[0].id]);
     }
-  }, [data?.data?.data]);
+  }, [
+    data?.data?.data,
+    setCurrentConversationId,
+    addLoadedConversationIds,
+    currentConversationId,
+  ]);
+
   if (data?.code !== 0 || !data?.data?.data) {
     return { data: {}, isLoading, isError };
   }
   return {
     data: groupBy(data.data.data, (item) =>
-      dayjs(Number(item.createdAt)).format("YYYY-MM-DD")
+      dayjs(Number(item.createdAt)).format('YYYY-MM-DD'),
     ),
     isLoading,
     isError,

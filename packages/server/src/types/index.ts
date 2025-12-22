@@ -9,10 +9,10 @@ export interface Session {
 export interface Message {
   id: string;
   sessionId: string;
-  role: "user" | "assistant" | "system";
+  role: 'user' | 'assistant' | 'system';
   content: string;
   createdAt: string;
-  feedback?: "liked" | "disliked" | null;
+  feedback?: 'liked' | 'disliked' | null;
 }
 
 export interface PaginatedResponse<T> {

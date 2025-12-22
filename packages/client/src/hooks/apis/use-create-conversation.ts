@@ -1,7 +1,7 @@
-import { QueryKeys } from "@/constants";
-import { createConversation } from "@/services";
-import { CommonResponse } from "@/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { QueryKeys } from '@/constants';
+import { createConversation } from '@/services';
+import type { CommonResponse } from '@/types';
 
 function useCreateConversation(config?: {
   onSuccess?: (
@@ -9,7 +9,7 @@ function useCreateConversation(config?: {
       id: string;
       title: string;
       createdAt: string;
-    }>
+    }>,
   ) => void;
 }) {
   const queryClient = useQueryClient();

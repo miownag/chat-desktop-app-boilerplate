@@ -1,36 +1,36 @@
-import { useShallowChatBotStore } from "@/stores";
+import { pick } from 'es-toolkit';
+import { useState } from 'react';
 import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "../ui/sidebar";
-import { pick } from "es-toolkit";
-import {
-  HiOutlineChatBubbleLeftEllipsis,
   HiOutlineArrowUpRight,
-} from "react-icons/hi2";
-import Space from "../space";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { MdOutlineContentCopy, MdOutlineMoreVert } from "react-icons/md";
-import { RiDeleteBin5Line, RiEmojiStickerLine } from "react-icons/ri";
-import { toast } from "sonner";
+  HiOutlineChatBubbleLeftEllipsis,
+} from 'react-icons/hi2';
+import { MdOutlineContentCopy, MdOutlineMoreVert } from 'react-icons/md';
+import { RiDeleteBin5Line, RiEmojiStickerLine } from 'react-icons/ri';
+import { toast } from 'sonner';
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Button } from "../ui/button";
-import { useState } from "react";
-import useGroupedConversationList from "@/hooks/use-grouped-conversation-list";
+} from '@/components/ui/empty';
+import useGroupedConversationList from '@/hooks/use-grouped-conversation-list';
+import { useShallowChatBotStore } from '@/stores';
+import Space from '../space';
+import { Button } from '../ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu';
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from '../ui/sidebar';
 
 interface ConversationListProps {
   setAlertId: (id: string) => void;
@@ -56,7 +56,11 @@ function EmptyConversationList() {
         className="text-muted-foreground"
         size="sm"
       >
-        <a href="https://dogbot.ai/docs/getting-started" target="_blank">
+        <a
+          href="https://dogbot.ai/docs/getting-started"
+          target="_blank"
+          rel="noopener"
+        >
           Learn More <HiOutlineArrowUpRight />
         </a>
       </Button>
@@ -71,10 +75,10 @@ function ConversationList({ setAlertId, setAlertOpen }: ConversationListProps) {
     addLoadedConversationIds,
   } = useShallowChatBotStore((state) =>
     pick(state, [
-      "currentConversationId",
-      "setCurrentConversationId",
-      "addLoadedConversationIds",
-    ])
+      'currentConversationId',
+      'setCurrentConversationId',
+      'addLoadedConversationIds',
+    ]),
   );
   const [pageConfig, setPageConfig] = useState({
     page: 1,
@@ -94,9 +98,9 @@ function ConversationList({ setAlertId, setAlertOpen }: ConversationListProps) {
   const copyConversationId = async (id: string) => {
     try {
       await navigator.clipboard.writeText(id);
-      toast.success("Copied");
+      toast.success('Copied');
     } catch (_err) {
-      toast.error("Failed to copy");
+      toast.error('Failed to copy');
     }
   };
 
@@ -117,8 +121,8 @@ function ConversationList({ setAlertId, setAlertOpen }: ConversationListProps) {
                     asChild
                     className={`cursor-pointer ${
                       currentConversationId === conversation.id
-                        ? "bg-neutral-100"
-                        : ""
+                        ? 'bg-neutral-100'
+                        : ''
                     } transition-colors duration-200`}
                   >
                     <div className="flex justify-between items-center">

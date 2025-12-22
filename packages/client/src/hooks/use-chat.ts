@@ -1,10 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState } from 'react';
 
 type Message = {
   id: string | number;
   role: string;
   content: string;
-  feedback?: "liked" | "disliked";
+  feedback?: 'liked' | 'disliked';
 };
 
 type OnRequestParams<TMessage extends Message> = {
@@ -19,7 +19,7 @@ type UseChatOptions<TMessage extends Message, TParsedMessage> = {
     messages: TMessage,
     enableDeepThink: boolean,
     enableSearch: boolean,
-    signal: AbortSignal
+    signal: AbortSignal,
   ) => Promise<TMessage | TMessage[]>;
   // Initial history messages
   historyMessages?: TMessage[];
@@ -43,7 +43,7 @@ type UseChatReturn<TMessage extends Message, TParsedMessage> = {
 };
 
 function useChat<TMessage extends Message, TParsedMessage = TMessage>(
-  options: UseChatOptions<TMessage, TParsedMessage>
+  options: UseChatOptions<TMessage, TParsedMessage>,
 ): UseChatReturn<TMessage, TParsedMessage> {
   const { requestFn, historyMessages = [], messageTransformer } = options;
 
@@ -85,7 +85,7 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
           message,
           enableDeepThink,
           enableSearch,
-          controller.signal
+          controller.signal,
         );
 
         // Handle response - can be single message or array
@@ -96,7 +96,7 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
         setMessages((prev) => [...prev, ...responseMessages]);
       } catch (error) {
         // Don't throw if the request was aborted
-        if (error instanceof Error && error.name === "AbortError") {
+        if (error instanceof Error && error.name === 'AbortError') {
           return;
         }
         throw error;
@@ -105,7 +105,7 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
         abortControllerRef.current = null;
       }
     },
-    [messages, requestFn, abort]
+    [messages, requestFn, abort],
   );
 
   // Compute parsed messages using the transformer

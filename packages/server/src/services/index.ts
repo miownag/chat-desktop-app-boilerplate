@@ -1,4 +1,4 @@
-import { Session, Message } from "../types";
+import type { Message, Session } from '../types';
 
 // Mock data storage
 const sessions: Map<string, Session> = new Map();
@@ -7,53 +7,53 @@ const messages: Map<string, Message[]> = new Map();
 // Initialize with some mock data
 const mockSessions: Session[] = [
   {
-    id: "2",
-    title: "Could you please",
-    createdAt: String(new Date("2024-01-03").getTime()),
-    updatedAt: String(new Date("2024-01-04").getTime()),
+    id: '2',
+    title: 'Could you please',
+    createdAt: String(new Date('2024-01-03').getTime()),
+    updatedAt: String(new Date('2024-01-04').getTime()),
     messageCount: 8,
   },
   {
-    id: "1",
-    title: "General Chat",
-    createdAt: String(new Date("2024-01-01").getTime()),
-    updatedAt: String(new Date("2024-01-02").getTime()),
+    id: '1',
+    title: 'General Chat',
+    createdAt: String(new Date('2024-01-01').getTime()),
+    updatedAt: String(new Date('2024-01-02').getTime()),
     messageCount: 5,
   },
 ];
 
 const mockMessages: { [key: string]: Message[] } = {
-  "1": [
+  '1': [
     {
-      id: "1",
-      sessionId: "1",
-      role: "user",
-      content: "Hello, how are you?",
-      createdAt: String(new Date("2024-01-01T10:00:00Z").getTime()),
+      id: '1',
+      sessionId: '1',
+      role: 'user',
+      content: 'Hello, how are you?',
+      createdAt: String(new Date('2024-01-01T10:00:00Z').getTime()),
     },
     {
-      id: "2",
-      sessionId: "1",
-      role: "assistant",
+      id: '2',
+      sessionId: '1',
+      role: 'assistant',
       content: "I'm doing well, thank you! How can I help you today?",
-      createdAt: String(new Date("2024-01-01T10:01:00Z").getTime()),
+      createdAt: String(new Date('2024-01-01T10:01:00Z').getTime()),
     },
   ],
-  "2": [
+  '2': [
     {
-      id: "3",
-      sessionId: "2",
-      role: "user",
-      content: "Can you review this code?",
-      createdAt: String(new Date("2024-01-03T14:00:00Z").getTime()),
+      id: '3',
+      sessionId: '2',
+      role: 'user',
+      content: 'Can you review this code?',
+      createdAt: String(new Date('2024-01-03T14:00:00Z').getTime()),
     },
     {
-      id: "4",
-      sessionId: "2",
-      role: "assistant",
+      id: '4',
+      sessionId: '2',
+      role: 'assistant',
       content:
         "I'd be happy to review your code. Please share the code you'd like me to look at.",
-      createdAt: String(new Date("2024-01-03T14:02:00Z").getTime()),
+      createdAt: String(new Date('2024-01-03T14:02:00Z').getTime()),
     },
   ],
 };
@@ -90,7 +90,7 @@ export class SessionService {
 
   static async createSession(title: string): Promise<Session> {
     const id = crypto.randomUUID();
-    const now = String(new Date().getTime());
+    const now = String(Date.now());
     const session: Session = {
       id,
       title: title,
@@ -113,7 +113,7 @@ export class SessionService {
 
   static async updateSession(
     id: string,
-    updates: Partial<Session>
+    updates: Partial<Session>,
   ): Promise<Session | null> {
     const session = sessions.get(id);
     if (!session) return null;
@@ -139,8 +139,8 @@ export class MessageService {
 
   static async addMessage(
     sessionId: string,
-    role: "user" | "assistant" | "system",
-    content: string
+    role: 'user' | 'assistant' | 'system',
+    content: string,
   ): Promise<Message> {
     const message: Message = {
       id: Date.now().toString(),
@@ -166,12 +166,12 @@ export class MessageService {
 
   static async deleteMessage(
     sessionId: string,
-    messageId: string
+    messageId: string,
   ): Promise<boolean> {
     const sessionMessages = messages.get(sessionId) || [];
     const initialLength = sessionMessages.length;
     const filteredMessages = sessionMessages.filter(
-      (msg) => msg.id !== messageId
+      (msg) => msg.id !== messageId,
     );
 
     if (filteredMessages.length < initialLength) {
@@ -193,15 +193,15 @@ export class MessageService {
   static async updateFeedback(
     conversationId: string,
     messageId: string,
-    actionType: "like" | "dislike",
-    action: "submit" | "cancel"
+    actionType: 'like' | 'dislike',
+    action: 'submit' | 'cancel',
   ): Promise<Message | null> {
     const sessionMessages = messages.get(conversationId) || [];
     const messageIndex = sessionMessages.findIndex(
-      (msg) => msg.id === messageId
+      (msg) => msg.id === messageId,
     );
     const feedbackStatus =
-      action === "cancel" ? null : actionType === "like" ? "liked" : "disliked";
+      action === 'cancel' ? null : actionType === 'like' ? 'liked' : 'disliked';
     if (messageIndex !== -1) {
       const updatedMessage = {
         ...sessionMessages[messageIndex],

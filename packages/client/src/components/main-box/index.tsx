@@ -1,11 +1,11 @@
-import MessageList from "@/components/message-list";
-import Sender from "@/components/sender";
-import useGetMessages from "@/hooks/apis/use-get-messages";
-import useChat from "@/hooks/use-chat";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
-import { useShallowChatBotStore } from "@/stores";
-import { pick } from "es-toolkit";
+import { pick } from 'es-toolkit';
+import { useEffect, useState } from 'react';
+import MessageList from '@/components/message-list';
+import Sender from '@/components/sender';
+import useGetMessages from '@/hooks/apis/use-get-messages';
+import useChat from '@/hooks/use-chat';
+import { cn } from '@/lib/utils';
+import { useShallowChatBotStore } from '@/stores';
 
 function MainBox({
   conversationId,
@@ -17,12 +17,12 @@ function MainBox({
   const [enableDeepThink, setEnableDeepThink] = useState(false);
   const [enableSearch, setEnableSearch] = useState(false);
   const { pendingMessage, setPendingMessage } = useShallowChatBotStore(
-    (state) => pick(state, ["pendingMessage", "setPendingMessage"])
+    (state) => pick(state, ['pendingMessage', 'setPendingMessage']),
   );
 
   const { isRequesting, onRequest, messages, setMessages, abort } = useChat({
     requestFn: (messages, enableDeepThink, enableSearch, signal) => {
-      console.log("params", {
+      console.log('params', {
         messages,
         enableDeepThink,
         enableSearch,
@@ -32,8 +32,8 @@ function MainBox({
         setTimeout(() => {
           resolve({
             id: Date.now().toString(),
-            content: "这是模拟的回复内容",
-            role: "assistant",
+            content: '这是模拟的回复内容',
+            role: 'assistant',
           });
         }, 1000);
       });
@@ -56,11 +56,11 @@ function MainBox({
 
   // 当组件挂载且有pendingMessage时，自动发送消息
   useEffect(() => {
-    if (isActive && pendingMessage && conversationId !== "new") {
+    if (isActive && pendingMessage && conversationId !== 'new') {
       // Add user message immediately
       const newUserMessage = {
         id: `msg-${crypto.randomUUID()}`,
-        role: "user",
+        role: 'user',
         content: pendingMessage,
       };
       setPendingMessage(null);
@@ -83,8 +83,8 @@ function MainBox({
   return (
     <div
       className={cn(
-        "p-2 flex-1 flex flex-col items-center justify-center overflow-auto",
-        isActive ? "" : "hidden"
+        'p-2 flex-1 flex flex-col items-center justify-center overflow-auto',
+        isActive ? '' : 'hidden',
       )}
     >
       <MessageList isActive={isActive} messages={messages} />

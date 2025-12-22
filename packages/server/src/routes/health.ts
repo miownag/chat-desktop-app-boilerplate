@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { AppContext } from '../types/context';
+import type { AppContext } from '../types/context';
 
 const health = new Hono<AppContext>();
 

@@ -1,32 +1,32 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
-import { requestLogger, errorHandler, responseWrapper } from "./middleware";
-import healthRoutes from "./routes/health";
-import sessionRoutes from "./routes/sessions";
-import messageRoutes from "./routes/messages";
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { errorHandler, requestLogger, responseWrapper } from './middleware';
+import healthRoutes from './routes/health';
+import messageRoutes from './routes/messages';
+import sessionRoutes from './routes/sessions';
 
 const app = new Hono();
 
 // Global middleware
-app.use("*", requestLogger);
-app.use("*", errorHandler);
-app.use("*", responseWrapper);
-app.use("*", cors());
+app.use('*', requestLogger);
+app.use('*', errorHandler);
+app.use('*', responseWrapper);
+app.use('*', cors());
 
 // Routes
-app.route("/health", healthRoutes);
-app.route("/api/sessions", sessionRoutes);
-app.route("/api/messages", messageRoutes);
+app.route('/health', healthRoutes);
+app.route('/api/sessions', sessionRoutes);
+app.route('/api/messages', messageRoutes);
 
 // Root route
-app.get("/", (c) => {
+app.get('/', (c) => {
   return c.json({
-    message: "Chat Desktop App API",
-    version: "1.0.0",
+    message: 'Chat Desktop App API',
+    version: '1.0.0',
     endpoints: {
-      health: "/health",
-      sessions: "/api/sessions",
-      messages: "/api/messages",
+      health: '/health',
+      sessions: '/api/sessions',
+      messages: '/api/messages',
     },
   });
 });
@@ -34,8 +34,8 @@ app.get("/", (c) => {
 // 404 handler
 app.notFound((c) => {
   return c.json(
-    { error: "Not Found", message: "The requested resource was not found" },
-    404
+    { error: 'Not Found', message: 'The requested resource was not found' },
+    404,
   );
 });
 

@@ -1,10 +1,10 @@
-import { submitFeedback } from "@/services";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from '@tanstack/react-query';
+import { submitFeedback } from '@/services';
 
 type FeedbackParams = {
   messageId: string;
-  actionType: "like" | "dislike";
-  action: "submit" | "cancel";
+  actionType: 'like' | 'dislike';
+  action: 'submit' | 'cancel';
 };
 
 function useFeedback() {

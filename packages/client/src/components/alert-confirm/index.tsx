@@ -20,10 +20,14 @@ export default function AlertDialogConfirm(props: {
   onConfirm?: () => void;
   onCancel?: () => void;
 }) {
-  const { title, description, children, open, setOpen, onConfirm, onCancel } = props;
+  const { title, description, children, open, setOpen, onConfirm, onCancel } =
+    props;
 
   return (
-    <AlertDialog {...(open !== undefined ? { open } : {})} onOpenChange={setOpen}>
+    <AlertDialog
+      {...(open !== undefined ? { open } : {})}
+      onOpenChange={setOpen}
+    >
       <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -31,7 +35,11 @@ export default function AlertDialogConfirm(props: {
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel {...(onCancel !== undefined ? { onClick: onCancel } : {})}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel
+            {...(onCancel !== undefined ? { onClick: onCancel } : {})}
+          >
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={() => {
               onConfirm?.();

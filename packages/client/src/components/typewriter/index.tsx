@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 export interface TypewriterProps {
   text: string;
@@ -22,13 +22,13 @@ const Typewriter = ({
   loop = false,
   loopDelay = 1000,
   showCursor = true,
-  cursorChar = "|",
+  cursorChar = '|',
   className,
   cursorClassName,
   deleteEndIndex = 0,
   onComplete,
 }: TypewriterProps) => {
-  const [currentText, setCurrentText] = useState("");
+  const [currentText, setCurrentText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const textRef = useRef(text);
@@ -37,7 +37,7 @@ const Typewriter = ({
   // Update text when prop changes
   useEffect(() => {
     textRef.current = text;
-    setCurrentText("");
+    setCurrentText('');
     setCurrentIndex(0);
     setIsDeleting(false);
   }, [text]);
@@ -90,17 +90,23 @@ const Typewriter = ({
         clearTimeout(timerRef.current);
       }
     };
-  }, [currentIndex, isDeleting, speed, loop, loopDelay, delay, onComplete]);
+  }, [
+    currentIndex,
+    isDeleting,
+    speed,
+    loop,
+    loopDelay,
+    delay,
+    onComplete,
+    deleteEndIndex,
+  ]);
 
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn('flex items-center', className)}>
       <span className="whitespace-nowrap">{currentText}</span>
       {showCursor && (
         <span
-          className={cn(
-            "ml-1",
-            cursorClassName
-          )}
+          className={cn('ml-1', cursorClassName)}
           style={{
             animation: 'blink 1s infinite',
           }}

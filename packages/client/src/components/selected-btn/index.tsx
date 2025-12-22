@@ -1,5 +1,6 @@
-import React, { ReactNode } from "react";
-import { Button } from "../ui/button";
+import type React from 'react';
+import type { ReactNode } from 'react';
+import { Button } from '../ui/button';
 
 interface SelectedBtnProps {
   icon: ReactNode;
@@ -18,8 +19,8 @@ function SelectedBtn({ selected, setSelected, label, icon }: SelectedBtnProps) {
       variant="outline"
       className={`rounded-full cursor-pointer${
         selected
-          ? " border-blue-500 text-blue-500 hover:text-blue-500 hover:bg-blue-50"
-          : ""
+          ? ' border-blue-500 text-blue-500 hover:text-blue-500 hover:bg-blue-50'
+          : ''
       }`}
       onClick={handleOnClick}
     >

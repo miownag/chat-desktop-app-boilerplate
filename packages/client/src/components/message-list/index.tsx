@@ -1,16 +1,16 @@
-import { useRef } from "react";
-import { ChatContainerContent, ChatContainerRoot } from "../ui/chat-container";
-import { ScrollButton } from "../ui/scroll-button";
-import AssistantMessage from "./components/assistant-message";
-import UserMessage from "./components/user-message";
-import Welcome from "../welcome";
-import { Message } from "@/hooks/use-chat";
+import { useRef } from 'react';
+import type { Message } from '@/hooks/use-chat';
+import { ChatContainerContent, ChatContainerRoot } from '../ui/chat-container';
+import { ScrollButton } from '../ui/scroll-button';
+import Welcome from '../welcome';
+import AssistantMessage from './components/assistant-message';
+import UserMessage from './components/user-message';
 
 export type ChatMessage = {
   id: number;
   role: string;
   content: string;
-  feedback?: "liked" | "disliked";
+  feedback?: 'liked' | 'disliked';
 };
 
 interface MessageListProps {
@@ -33,7 +33,7 @@ function MessageList({ messages, isActive }: MessageListProps) {
       <ChatContainerRoot className="h-full">
         <ChatContainerContent className="space-y-0 px-5 py-12">
           {messages.map((message: Message, index: number) =>
-            message.role === "assistant" ? (
+            message.role === 'assistant' ? (
               <AssistantMessage
                 key={message.id}
                 message={message}
@@ -41,7 +41,7 @@ function MessageList({ messages, isActive }: MessageListProps) {
               />
             ) : (
               <UserMessage key={message.id} message={message} />
-            )
+            ),
           )}
         </ChatContainerContent>
         <div className="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-end px-5">

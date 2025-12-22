@@ -1,6 +1,6 @@
 enum QueryKeys {
-  CONVERSATION_LIST = "conversationList",
-  MESSAGES = "messages",
+  CONVERSATION_LIST = 'conversationList',
+  MESSAGES = 'messages',
 }
 
 export { QueryKeys };

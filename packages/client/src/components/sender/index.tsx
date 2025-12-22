@@ -1,18 +1,18 @@
+import { pick } from 'es-toolkit';
+import { useState } from 'react';
+import { LuBrain, LuGlobe, LuMic, LuPlus, LuSend } from 'react-icons/lu';
+import { RiMoreFill } from 'react-icons/ri';
+import SelectedBtn from '@/components/selected-btn';
+import { Button } from '@/components/ui/button';
 import {
   PromptInput,
   PromptInputAction,
   PromptInputActions,
   PromptInputTextarea,
-} from "@/components/ui/prompt-input";
-import { Button } from "@/components/ui/button";
-import { LuBrain, LuGlobe, LuMic, LuPlus, LuSend } from "react-icons/lu";
-import { RiMoreFill } from "react-icons/ri";
-import { useState } from "react";
-import SelectedBtn from "@/components/selected-btn";
-import { Message, OnRequestParams } from "@/hooks/use-chat";
-import useCreateConversation from "@/hooks/apis/use-create-conversation";
-import { useShallowChatBotStore } from "@/stores";
-import { pick } from "es-toolkit";
+} from '@/components/ui/prompt-input';
+import useCreateConversation from '@/hooks/apis/use-create-conversation';
+import type { Message, OnRequestParams } from '@/hooks/use-chat';
+import { useShallowChatBotStore } from '@/stores';
 
 interface SenderProps {
   enableDeepThink: boolean;
@@ -36,14 +36,14 @@ function Sender(props: SenderProps) {
     isRequesting,
     abort,
   } = props;
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState('');
   const { currentConversationId, setCurrentConversationId, setPendingMessage } =
     useShallowChatBotStore((state) =>
       pick(state, [
-        "currentConversationId",
-        "setCurrentConversationId",
-        "setPendingMessage",
-      ])
+        'currentConversationId',
+        'setCurrentConversationId',
+        'setPendingMessage',
+      ]),
     );
   const { mutateAsync: createConversationAndSend } = useCreateConversation({
     onSuccess: (params) => {
@@ -54,9 +54,9 @@ function Sender(props: SenderProps) {
   const handleSubmit = () => {
     if (!prompt.trim()) return;
     const trimmedPrompt = prompt.trim();
-    setPrompt("");
+    setPrompt('');
 
-    if (currentConversationId === "new") {
+    if (currentConversationId === 'new') {
       // 保存用户输入的内容到状态管理
       setPendingMessage(trimmedPrompt);
       createConversationAndSend();
@@ -66,7 +66,7 @@ function Sender(props: SenderProps) {
     // Add user message immediately
     const newUserMessage = {
       id: `msg-${crypto.randomUUID()}`,
-      role: "user",
+      role: 'user',
       content: trimmedPrompt,
     };
 
@@ -148,16 +148,13 @@ function Sender(props: SenderProps) {
                   <Button
                     size="icon"
                     disabled={!prompt.trim() && !isRequesting}
-                    onClick={handleSubmit}
+                    onClick={isRequesting ? abort : handleSubmit}
                     className={`size-9 rounded-full cursor-pointer`}
                   >
                     {!isRequesting ? (
                       <LuSend size={18} />
                     ) : (
-                      <span
-                        className="size-3 rounded-xs bg-white"
-                        onClick={abort}
-                      />
+                      <span className="size-3 rounded-xs bg-white" />
                     )}
                   </Button>
                 </div>

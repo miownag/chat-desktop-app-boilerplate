@@ -1,13 +1,13 @@
-import { CommonResponse } from "@/types";
+import type { CommonResponse } from '@/types';
 
-const isDev = process.env.NODE_ENV === "development";
+const isDev = process.env.NODE_ENV === 'development';
 const BASE_URL = isDev
-  ? "http://localhost:3000/api"
-  : "https://api.example.com/api";
+  ? 'http://localhost:3000/api'
+  : 'https://api.example.com/api';
 
 async function getSessionList(
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
 ): Promise<
   CommonResponse<{
     data: {
@@ -23,9 +23,9 @@ async function getSessionList(
   }>
 > {
   const response = await fetch(`${BASE_URL}/sessions/list`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ page, pageSize }),
   });
@@ -33,21 +33,21 @@ async function getSessionList(
 }
 
 async function getMessagesById(
-  conversationId: string
+  conversationId: string,
 ): Promise<CommonResponse<any>> {
   const response = await fetch(
-    `${BASE_URL}/messages/list?conversationId=${conversationId}`
+    `${BASE_URL}/messages/list?conversationId=${conversationId}`,
   );
   return await response.json();
 }
 
 async function createConversation(
-  title?: string
+  title?: string,
 ): Promise<CommonResponse<{ id: string; title: string; createdAt: string }>> {
   const response = await fetch(`${BASE_URL}/sessions/create`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ title }),
   });
@@ -55,13 +55,13 @@ async function createConversation(
 }
 
 async function deleteConversation(
-  conversationId: string
+  conversationId: string,
 ): Promise<CommonResponse<null>> {
   const response = await fetch(
     `${BASE_URL}/sessions/delete/${conversationId}`,
     {
-      method: "GET",
-    }
+      method: 'GET',
+    },
   );
   return await response.json();
 }
@@ -73,14 +73,14 @@ async function sendMessage(
   },
   onMessage?: (chunk: string) => void,
   onComplete?: (fullMessage: string) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ): Promise<ReadableStream<Uint8Array> | undefined> {
   try {
     const response = await fetch(`${BASE_URL}/messages/send`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        Accept: "text/event-stream",
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
       },
       body: JSON.stringify(params),
     });
@@ -90,12 +90,12 @@ async function sendMessage(
     }
 
     if (!response.body) {
-      throw new Error("Response body is null");
+      throw new Error('Response body is null');
     }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let fullMessage = "";
+    let fullMessage = '';
 
     // 读取流
     const readStream = async () => {
@@ -108,25 +108,25 @@ async function sendMessage(
           }
 
           const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
+          const lines = chunk.split('\n');
 
           for (const line of lines) {
-            if (line.startsWith("data: ")) {
+            if (line.startsWith('data: ')) {
               const data = line.slice(6).trim();
-              if (data === "[DONE]") {
+              if (data === '[DONE]') {
                 onComplete?.(fullMessage);
                 return;
               }
               try {
                 const parsed = JSON.parse(data);
-                const content = parsed.content || parsed.delta || "";
+                const content = parsed.content || parsed.delta || '';
                 if (content) {
                   fullMessage += content;
                   onMessage?.(content);
                 }
               } catch (e) {
                 // 忽略解析错误的行
-                console.warn("Failed to parse SSE data:", data);
+                console.warn('Failed to parse SSE data:', data);
               }
             }
           }
@@ -146,13 +146,13 @@ async function sendMessage(
 
 async function submitFeedback(params: {
   messageId: string;
-  actionType: "like" | "dislike";
-  action: "submit" | "cancel";
+  actionType: 'like' | 'dislike';
+  action: 'submit' | 'cancel';
 }): Promise<CommonResponse<null>> {
   const response = await fetch(`${BASE_URL}/messages/feedback`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(params),
   });
