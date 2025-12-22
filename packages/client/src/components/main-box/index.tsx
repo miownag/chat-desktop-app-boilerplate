@@ -32,7 +32,21 @@ function MainBox({
         setTimeout(() => {
           resolve({
             id: Date.now().toString(),
-            content: '这是模拟的回复内容',
+            content: `## Hello World!
+          
+This message supports **bold text**, *italics*, and other Markdown features:
+
+- Bullet points
+- Code blocks
+- [Links](https://example.com)
+
+\`\`\`js
+// Even code with syntax highlighting
+function hello() {
+  return "world";
+}
+\`\`\`
+`,
             role: 'assistant',
           });
         }, 1000);

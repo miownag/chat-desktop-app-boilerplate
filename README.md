@@ -24,8 +24,8 @@ That's it! The application will automatically open in development mode.
 
 ### Frontend
 - React v19
-- TypeScript
 - TanStack Router
+- TanStack Query
 - Zustand
 - shadcn/ui
 - Tailwind CSS v4
