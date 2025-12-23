@@ -1,4 +1,5 @@
 import { createMiddleware } from 'hono/factory';
+import { auth } from '../lib/auth';
 import type { AppContext } from '../types/context';
 
 export const requestLogger = createMiddleware<AppContext>(async (c, next) => {
@@ -58,4 +59,23 @@ export const responseWrapper = createMiddleware<AppContext>(async (c, next) => {
       headers: c.res.headers,
     });
   }
+});
+
+// 认证中间件
+export const authMiddleware = createMiddleware<AppContext>(async (c, next) => {
+  const session = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  });
+
+  if (!session) {
+    return c.json(
+      { error: 'Unauthorized', message: 'Please login first' },
+      401,
+    );
+  }
+
+  c.set('user', session.user);
+  c.set('session', session.session);
+
+  await next();
 });

@@ -2,9 +2,9 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { auth } from './lib/auth';
 import { errorHandler, requestLogger, responseWrapper } from './middleware';
+import sessionRoutes from './routes/conversations';
 import healthRoutes from './routes/health';
 import messageRoutes from './routes/messages';
-import sessionRoutes from './routes/sessions';
 
 const app = new Hono();
 
@@ -19,17 +19,21 @@ app.use(
   }),
 );
 
-// Global middleware
+// Global middleware (exclude auth routes from responseWrapper)
 app.use('*', requestLogger);
 app.use('*', errorHandler);
-app.use('*', responseWrapper);
 
-// Better Auth routes
+// Better Auth routes (before responseWrapper to avoid conflicts)
 app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
+
+// Apply responseWrapper only to non-auth routes
+app.use('/api/conversations/*', responseWrapper);
+app.use('/api/messages/*', responseWrapper);
+app.use('/health/*', responseWrapper);
 
 // Routes
 app.route('/health', healthRoutes);
-app.route('/api/sessions', sessionRoutes);
+app.route('/api/conversations', sessionRoutes);
 app.route('/api/messages', messageRoutes);
 
 // Root route
@@ -39,7 +43,7 @@ app.get('/', (c) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
-      sessions: '/api/sessions',
+      conversations: '/api/conversations',
       messages: '/api/messages',
     },
   });

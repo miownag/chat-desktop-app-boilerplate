@@ -68,7 +68,6 @@ function hello() {
     }
   }, [isSuccess, data?.data?.data, setMessages, pendingMessage]);
 
-  // 当组件挂载且有pendingMessage时，自动发送消息
   useEffect(() => {
     if (isActive && pendingMessage && conversationId !== 'new') {
       // Add user message immediately

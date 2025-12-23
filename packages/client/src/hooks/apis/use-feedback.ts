@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { submitFeedback } from '@/services';
 
 type FeedbackParams = {
+  conversationId: string;
   messageId: string;
   actionType: 'like' | 'dislike';
   action: 'submit' | 'cancel';

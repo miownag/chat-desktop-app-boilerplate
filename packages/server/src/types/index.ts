@@ -1,4 +1,4 @@
-export interface Session {
+export interface Conversation {
   id: string;
   title: string;
   createdAt: string;
@@ -8,7 +8,7 @@ export interface Session {
 
 export interface Message {
   id: string;
-  sessionId: string;
+  conversationId: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   createdAt: string;
@@ -23,7 +23,7 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-export interface CreateSessionRequest {
+export interface CreateConversationRequest {
   title?: string;
 }
 

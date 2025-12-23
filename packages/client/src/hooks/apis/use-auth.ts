@@ -52,7 +52,7 @@ export function useAuth() {
   };
 }
 
-// Email sign in mutation
+// Email sign in mutation with auto-register
 export function useEmailSignIn() {
   const queryClient = useQueryClient();
 
@@ -64,14 +64,42 @@ export function useEmailSignIn() {
       email: string;
       password: string;
     }) => {
-      const result = await signIn.email({
+      // Try to sign in first
+      const signInResult = await signIn.email({
         email,
         password,
       });
-      if (result.error) {
-        throw new Error(result.error.message);
+
+      // If sign in succeeds, return the data
+      if (!signInResult.error) {
+        return signInResult.data;
       }
-      return result.data;
+
+      // If user not found, auto-register then sign in
+      const errorCode = signInResult.error.code;
+      if (
+        errorCode === 'INVALID_EMAIL_OR_PASSWORD' ||
+        errorCode === 'USER_NOT_FOUND'
+      ) {
+        // Auto-register with email as name
+        const name = email.split('@')[0];
+        const signUpResult = await signUp.email({
+          email,
+          password,
+          name,
+        });
+
+        if (signUpResult.error) {
+          // If registration also fails, throw the original sign-in error
+          throw new Error(signInResult.error.message);
+        }
+
+        // Registration succeeded, user is now signed in
+        return signUpResult.data;
+      }
+
+      // Other errors, throw as-is
+      throw new Error(signInResult.error.message);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [AUTH_QUERY_KEY] });

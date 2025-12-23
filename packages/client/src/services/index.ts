@@ -1,11 +1,23 @@
 import type { CommonResponse } from '@/types';
 
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = import.meta.env.DEV;
 const BASE_URL = isDev
   ? 'http://localhost:3000/api'
   : 'https://api.example.com/api';
 
-async function getSessionList(
+// Common fetch options for authenticated requests
+const fetchWithAuth = (url: string, options: RequestInit = {}) => {
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+};
+
+async function getConversationList(
   page: number = 1,
   pageSize: number = 10,
 ): Promise<
@@ -22,11 +34,8 @@ async function getSessionList(
     pageSize: number;
   }>
 > {
-  const response = await fetch(`${BASE_URL}/sessions/list`, {
+  const response = await fetchWithAuth(`${BASE_URL}/conversations/list`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({ page, pageSize }),
   });
   return await response.json();
@@ -35,7 +44,7 @@ async function getSessionList(
 async function getMessagesById(
   conversationId: string,
 ): Promise<CommonResponse<any>> {
-  const response = await fetch(
+  const response = await fetchWithAuth(
     `${BASE_URL}/messages/list?conversationId=${conversationId}`,
   );
   return await response.json();
@@ -44,11 +53,8 @@ async function getMessagesById(
 async function createConversation(
   title?: string,
 ): Promise<CommonResponse<{ id: string; title: string; createdAt: string }>> {
-  const response = await fetch(`${BASE_URL}/sessions/create`, {
+  const response = await fetchWithAuth(`${BASE_URL}/conversations/create`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify({ title }),
   });
   return await response.json();
@@ -57,10 +63,10 @@ async function createConversation(
 async function deleteConversation(
   conversationId: string,
 ): Promise<CommonResponse<null>> {
-  const response = await fetch(
-    `${BASE_URL}/sessions/delete/${conversationId}`,
+  const response = await fetchWithAuth(
+    `${BASE_URL}/conversations/delete/${conversationId}`,
     {
-      method: 'GET',
+      method: 'DELETE',
     },
   );
   return await response.json();
@@ -76,10 +82,9 @@ async function sendMessage(
   onError?: (error: Error) => void,
 ): Promise<ReadableStream<Uint8Array> | undefined> {
   try {
-    const response = await fetch(`${BASE_URL}/messages/send`, {
+    const response = await fetchWithAuth(`${BASE_URL}/messages/send`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
         Accept: 'text/event-stream',
       },
       body: JSON.stringify(params),
@@ -124,7 +129,7 @@ async function sendMessage(
                   fullMessage += content;
                   onMessage?.(content);
                 }
-              } catch (e) {
+              } catch {
                 // 忽略解析错误的行
                 console.warn('Failed to parse SSE data:', data);
               }
@@ -145,22 +150,20 @@ async function sendMessage(
 }
 
 async function submitFeedback(params: {
+  conversationId: string;
   messageId: string;
   actionType: 'like' | 'dislike';
   action: 'submit' | 'cancel';
 }): Promise<CommonResponse<null>> {
-  const response = await fetch(`${BASE_URL}/messages/feedback`, {
+  const response = await fetchWithAuth(`${BASE_URL}/messages/feedback`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
     body: JSON.stringify(params),
   });
   return await response.json();
 }
 
 export {
-  getSessionList,
+  getConversationList,
   getMessagesById,
   createConversation,
   deleteConversation,

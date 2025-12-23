@@ -1,8 +1,10 @@
-import type { Context } from 'hono';
+import type { Session, User } from 'better-auth';
 
-export interface AppContext extends Context {
+export interface AppContext {
   Variables: {
     requestId: string;
     timestamp: number;
+    user: User | null;
+    session: Session | null;
   };
 }

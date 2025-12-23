@@ -1,13 +1,17 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
 import z from 'zod';
+import { authMiddleware } from '../middleware';
 import { MessageService } from '../services';
 import type { Message } from '../types';
 import type { AppContext } from '../types/context';
 
 const messages = new Hono<AppContext>();
 
-// Get messages for a session (paginated)
+// Apply auth middleware to all routes
+messages.use('*', authMiddleware);
+
+// Get messages for a conversation
 messages.get(
   '/list',
   zValidator(
@@ -18,7 +22,11 @@ messages.get(
   ),
   async (c) => {
     const { conversationId } = c.req.valid('query');
-    const result = await MessageService.getMessages(conversationId);
+    const user = c.get('user');
+    if (!user) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
+    const result = await MessageService.getMessages(conversationId, user.id);
 
     return c.json<{
       data: Message[];
@@ -28,8 +36,13 @@ messages.get(
 
 // Send message (with SSE response)
 messages.post('/send', async (c) => {
+  const user = c.get('user');
+  if (!user) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
   const body = await c.req.json<{
-    sessionId: string;
+    conversationId: string;
     content: string;
     context?: {
       systemPrompt?: string;
@@ -38,18 +51,23 @@ messages.post('/send', async (c) => {
     };
   }>();
 
-  const { sessionId, content, context } = body;
+  const { conversationId, content } = body;
 
-  if (!sessionId || !content) {
-    return c.json({ error: 'sessionId and content are required' }, 400);
+  if (!conversationId || !content) {
+    return c.json({ error: 'conversationId and content are required' }, 400);
   }
 
   // Add user message
   const userMessage = await MessageService.addMessage(
-    sessionId,
+    conversationId,
+    user.id,
     'user',
     content,
   );
+
+  if (!userMessage) {
+    return c.json({ error: 'Failed to add message' }, 500);
+  }
 
   // Set up SSE headers
   c.header('Content-Type', 'text/event-stream');
@@ -93,7 +111,8 @@ messages.post('/send', async (c) => {
 
         // Add assistant message to database
         const assistantMessage = await MessageService.addMessage(
-          sessionId,
+          conversationId,
+          user.id,
           'assistant',
           responseText,
         );
@@ -136,9 +155,14 @@ messages.post(
   async (c) => {
     const { conversationId, messageId, actionType, action } =
       c.req.valid('json');
+    const user = c.get('user');
+    if (!user) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
     const result = await MessageService.updateFeedback(
       conversationId,
       messageId,
+      user.id,
       actionType,
       action,
     );
