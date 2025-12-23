@@ -15,8 +15,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth, useSignOut } from '@/hooks/apis/use-auth';
-import { LoginForm } from '../login-form';
+import LoginForm from '../login-form';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader } from '../ui/dialog';
 
 export default function AccountManage() {
@@ -56,16 +57,12 @@ export default function AccountManage() {
   if (!isAuthenticated) {
     return (
       <>
-        <button
-          type="button"
-          className="cursor-pointer flex items-center gap-1 pl-2 py-1 rounded-lg hover:bg-neutral-100 transition-colors"
+        <Button
+          className="cursor-pointer font-semibold mt-1"
           onClick={handleLogin}
         >
-          <Avatar>
-            <AvatarFallback>?</AvatarFallback>
-          </Avatar>
-          <span className="text-sm">Login</span>
-        </button>
+          Login
+        </Button>
         <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent>
             <DialogHeader />

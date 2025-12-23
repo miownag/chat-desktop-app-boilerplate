@@ -34,7 +34,7 @@ function UserMessage({ message }: UserMessageProps) {
   return (
     <Message
       key={message.id}
-      className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-6 items-start"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-2 items-start"
     >
       <div className="group flex flex-col items-end gap-1 w-full">
         <div className="flex flex-row-reverse gap-4 w-full">

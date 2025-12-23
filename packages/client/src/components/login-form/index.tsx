@@ -26,10 +26,7 @@ import { cn } from '@/lib/utils';
 
 type AuthMode = 'signin' | 'signup';
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentProps<'div'>) {
+function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -231,3 +228,5 @@ export function LoginForm({
     </div>
   );
 }
+
+export default LoginForm;

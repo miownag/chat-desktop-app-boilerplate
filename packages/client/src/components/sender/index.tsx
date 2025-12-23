@@ -1,6 +1,6 @@
 import { pick } from 'es-toolkit';
 import { useState } from 'react';
-import { LuBrain, LuGlobe, LuMic, LuPlus, LuSend } from 'react-icons/lu';
+import { LuArrowUp, LuBrain, LuGlobe, LuMic, LuPlus } from 'react-icons/lu';
 import { RiMoreFill } from 'react-icons/ri';
 import SelectedBtn from '@/components/selected-btn';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import useCreateConversation from '@/hooks/apis/use-create-conversation';
 import { useRefreshConversationList } from '@/hooks/apis/use-get-conversation-list';
 import type { Message, OnRequestParams } from '@/hooks/use-chat';
 import { useShallowChatBotStore } from '@/stores';
+import { Separator } from '../ui/separator';
 
 interface SenderProps {
   enableDeepThink: boolean;
@@ -138,15 +139,14 @@ function Sender(props: SenderProps) {
                   </PromptInputAction>
                 </div>
                 <div className="flex items-center gap-2">
-                  <PromptInputAction tooltip="Voice input">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="size-9 rounded-full cursor-pointer"
-                    >
-                      <LuMic size={18} />
-                    </Button>
-                  </PromptInputAction>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="size-9 rounded-full cursor-pointer"
+                  >
+                    <LuMic size={18} />
+                  </Button>
+                  <Separator orientation="vertical" className="h-5!" />
                   <Button
                     size="icon"
                     disabled={!prompt.trim() && !isRequesting}
@@ -154,7 +154,7 @@ function Sender(props: SenderProps) {
                     className={`size-9 rounded-full cursor-pointer`}
                   >
                     {!isRequesting ? (
-                      <LuSend size={18} />
+                      <LuArrowUp size={18} />
                     ) : (
                       <span className="size-3 rounded-xs bg-white" />
                     )}

@@ -58,7 +58,7 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
   return (
     <Message
       key={message.id}
-      className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-6 items-start"
+      className="mx-auto flex w-full max-w-3xl flex-col gap-2 items-start"
     >
       <div className="group flex w-full flex-col gap-0">
         <div className="flex gap-4 w-full">
