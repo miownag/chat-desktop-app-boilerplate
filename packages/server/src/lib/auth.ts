@@ -20,5 +20,9 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
-  trustedOrigins: ['http://localhost:1420', 'tauri://localhost'],
+  trustedOrigins: [
+    'http://localhost:1420',
+    'tauri://localhost',
+    'bricks://auth-callback',
+  ],
 });

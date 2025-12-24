@@ -6,9 +6,10 @@ import {
   Message,
   MessageAction,
   MessageActions,
-  MessageAvatar,
   MessageContent,
 } from '@/components/ui/message';
+import UserAvatar from '@/components/user-avatar';
+import { useAuth } from '@/hooks/apis/use-auth';
 import type { Message as MessageType } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +19,7 @@ interface UserMessageProps {
 
 function UserMessage({ message }: UserMessageProps) {
   const [copied, setCopied] = useState(false);
+  const { user } = useAuth();
 
   const handleCopy = async () => {
     try {
@@ -38,7 +40,7 @@ function UserMessage({ message }: UserMessageProps) {
     >
       <div className="group flex flex-col items-end gap-1 w-full">
         <div className="flex flex-row-reverse gap-4 w-full">
-          <MessageAvatar src="https://github.com/shadcn.png" alt="shadcn" />
+          <UserAvatar user={user} />
           <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%]">
             {message.content}
           </MessageContent>

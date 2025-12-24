@@ -143,11 +143,13 @@ export function useGithubSignIn() {
     mutationFn: async () => {
       const result = await signIn.social({
         provider: 'github',
-        callbackURL: window.location.origin,
+        callbackURL: 'http://localhost:1420',
       });
+
       if (result.error) {
         throw new Error(result.error.message);
       }
+
       return result.data;
     },
   });
@@ -158,11 +160,13 @@ export function useGoogleSignIn() {
     mutationFn: async () => {
       const result = await signIn.social({
         provider: 'google',
-        callbackURL: window.location.origin,
+        callbackURL: 'http://localhost:1420',
       });
+
       if (result.error) {
         throw new Error(result.error.message);
       }
+
       return result.data;
     },
   });

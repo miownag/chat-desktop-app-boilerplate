@@ -16,9 +16,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAuth, useSignOut } from '@/hooks/apis/use-auth';
 import LoginForm from '../login-form';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { Dialog, DialogContent, DialogHeader } from '../ui/dialog';
+import UserAvatar from '../user-avatar';
 
 export default function AccountManage() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -31,17 +32,6 @@ export default function AccountManage() {
 
   const handleLogin = () => {
     setShowDialog(true);
-  };
-
-  // Get user initials for avatar fallback
-  const getInitials = (name: string | null) => {
-    if (!name) return 'U';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
   };
 
   if (isLoading) {
@@ -77,13 +67,7 @@ export default function AccountManage() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="cursor-pointer flex items-center gap-1 pl-2 py-1 rounded-lg hover:bg-neutral-100 transition-colors">
-          <Avatar>
-            <AvatarImage
-              src={user?.image ?? undefined}
-              alt={user?.name ?? 'User'}
-            />
-            <AvatarFallback>{getInitials(user?.name ?? null)}</AvatarFallback>
-          </Avatar>
+          <UserAvatar user={user} />
           <MdOutlineArrowDropDown className="text-2xl" />
         </div>
       </DropdownMenuTrigger>

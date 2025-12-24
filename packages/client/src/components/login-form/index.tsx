@@ -60,13 +60,6 @@ function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
     await googleSignIn.mutateAsync();
   };
 
-  const toggleMode = () => {
-    setMode(mode === 'signin' ? 'signup' : 'signin');
-    setEmail('');
-    setPassword('');
-    setName('');
-  };
-
   const error =
     emailSignIn.error ||
     emailSignUp.error ||
@@ -171,14 +164,12 @@ function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
                 required
                 disabled={isLoading}
               />
-            </Field>
-            {error && (
-              <Field>
+              {error && (
                 <p className="text-sm text-destructive text-center">
                   {error.message}
                 </p>
-              </Field>
-            )}
+              )}
+            </Field>
             <Field>
               <Button
                 type="submit"
@@ -191,31 +182,6 @@ function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
                     ? 'Login'
                     : 'Sign Up'}
               </Button>
-              <FieldDescription className="px-6 text-center">
-                {mode === 'signin' ? (
-                  <>
-                    Don't have an account?{' '}
-                    <button
-                      type="button"
-                      className="underline underline-offset-4 hover:text-primary"
-                      onClick={toggleMode}
-                    >
-                      Sign up
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    Already have an account?{' '}
-                    <button
-                      type="button"
-                      className="underline underline-offset-4 hover:text-primary"
-                      onClick={toggleMode}
-                    >
-                      Login
-                    </button>
-                  </>
-                )}
-              </FieldDescription>
               <FieldDescription className="px-6 text-center mt-2">
                 By clicking continue, you agree to our{' '}
                 <a href="https://www.example.com">Terms of Service</a> and{' '}
