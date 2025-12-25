@@ -40,8 +40,17 @@ messages.post(
   zValidator(
     'json',
     z.object({
-      conversationId: z.string(),
-      content: z.string(),
+      id: z.string(),
+      message: z.object({
+        id: z.string(),
+        parts: z.array(
+          z.object({
+            type: z.string(),
+            text: z.string(),
+          }),
+        ),
+        role: z.enum(['user', 'assistant', 'system']),
+      }),
       enableDeepThink: z.boolean().optional(),
       enableSearch: z.boolean().optional(),
     }),
@@ -52,25 +61,18 @@ messages.post(
       return c.json({ error: 'Unauthorized' }, 401);
     }
 
-    const body = await c.req.json<{
-      conversationId: string;
-      content: string;
-      enableDeepThink?: boolean;
-      enableSearch?: boolean;
-    }>();
+    const { id, message, enableDeepThink, enableSearch } = c.req.valid('json');
 
-    const { conversationId, content, enableDeepThink, enableSearch } = body;
-
-    if (!conversationId || !content) {
-      return c.json({ error: 'conversationId and content are required' }, 400);
+    if (!id || !message) {
+      return c.json({ error: 'id and message are required' }, 400);
     }
 
     // Add user message
     const userMessage = await MessageService.addMessage(
-      conversationId,
+      id,
       user.id,
-      'user',
-      content,
+      message.role,
+      message.parts.map((part) => part.text).join(''),
     );
 
     if (!userMessage) {
@@ -98,7 +100,7 @@ messages.post(
           await new Promise((resolve) => setTimeout(resolve, 500));
 
           // Simulate streaming response chunks
-          const responseText = `I received your message: "${content}". This is a mock response from the LLM.
+          const responseText = `I received your message: "${message.parts.map((part) => part.text).join('')}". This is a mock response from the LLM.
 Your **${enableDeepThink ? 'wanna' : 'dont wanna'}** deep think. And your search config is ${enableSearch}.`;
           const chunks = responseText.split(' ');
 
@@ -120,7 +122,7 @@ Your **${enableDeepThink ? 'wanna' : 'dont wanna'}** deep think. And your search
 
           // Add assistant message to database
           const assistantMessage = await MessageService.addMessage(
-            conversationId,
+            id,
             user.id,
             'assistant',
             responseText,

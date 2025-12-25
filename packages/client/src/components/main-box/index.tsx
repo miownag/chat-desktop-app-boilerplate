@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react';
 import MessageList from '@/components/message-list';
 import Sender from '@/components/sender';
 import useGetMessages from '@/hooks/apis/use-get-messages';
-import useChat from '@/hooks/use-chat';
+import useBricksChat from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
-import { sendMessage } from '@/services';
 import { useShallowChatBotStore } from '@/stores';
 
 function MainBox({
@@ -21,40 +20,9 @@ function MainBox({
     (state) => pick(state, ['pendingMessage', 'setPendingMessage']),
   );
 
-  const { isRequesting, onRequest, messages, setMessages, abort } = useChat({
-    requestFn: async ({
-      message,
-      enableDeepThink,
-      enableSearch,
-      signal,
-      onSuccess,
-      onError,
-      onUpdate,
-    }) => {
-      sendMessage({
-        params: {
-          conversationId,
-          content: message.content,
-          enableDeepThink,
-          enableSearch,
-        },
-        signal,
-        onMessage: (chunk) => {
-          console.log('onMessage123123', chunk);
-          onUpdate(chunk);
-        },
-        onComplete: (fullMessage) => {
-          onSuccess({
-            content: fullMessage,
-            status: 'completed',
-          });
-        },
-        onError: (error) => {
-          onError(error);
-        },
-      });
-    },
-  });
+  const { status, messages, sendMessage, setMessages, stop, regenerate } =
+    useBricksChat(conversationId);
+
   const { data, isSuccess } = useGetMessages({
     conversationId,
   });
@@ -72,25 +40,24 @@ function MainBox({
 
   useEffect(() => {
     if (isActive && pendingMessage && conversationId !== 'new') {
-      // Add user message immediately
-      const newUserMessage = {
-        id: `msg-${crypto.randomUUID()}`,
-        role: 'user',
-        content: pendingMessage,
-        status: 'completed' as const,
-      };
       setPendingMessage(null);
-      onRequest({
-        message: newUserMessage,
-        enableDeepThink,
-        enableSearch,
-      });
+      sendMessage(
+        {
+          text: pendingMessage,
+        },
+        {
+          body: {
+            enableDeepThink,
+            enableSearch,
+          },
+        },
+      );
     }
   }, [
     isActive,
     pendingMessage,
     conversationId,
-    onRequest,
+    sendMessage,
     enableDeepThink,
     enableSearch,
     setPendingMessage,
@@ -103,16 +70,20 @@ function MainBox({
         isActive ? '' : 'hidden',
       )}
     >
-      <MessageList isActive={isActive} messages={messages} />
+      <MessageList
+        isActive={isActive}
+        messages={messages}
+        regenerate={regenerate}
+      />
       <Sender
         enableDeepThink={enableDeepThink}
         setEnableDeepThink={setEnableDeepThink}
         enableSearch={enableSearch}
         setEnableSearch={setEnableSearch}
         isActive={isActive}
-        onRequest={onRequest}
-        isRequesting={isRequesting}
-        abort={abort}
+        sendMessage={sendMessage}
+        status={status}
+        stop={stop}
       />
     </div>
   );

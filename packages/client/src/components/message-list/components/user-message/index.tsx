@@ -10,11 +10,11 @@ import {
 } from '@/components/ui/message';
 import UserAvatar from '@/components/user-avatar';
 import { useAuth } from '@/hooks/apis/use-auth';
-import type { Message as MessageType } from '@/hooks/use-chat';
+import type { ChatHookType } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
 
 interface UserMessageProps {
-  message: MessageType;
+  message: ChatHookType['messages'][0];
 }
 
 function UserMessage({ message }: UserMessageProps) {
@@ -23,7 +23,11 @@ function UserMessage({ message }: UserMessageProps) {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(message.content);
+      await navigator.clipboard.writeText(
+        message.parts
+          .map((part) => (part.type === 'text' ? part.text : ''))
+          .join(''),
+      );
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
@@ -42,7 +46,9 @@ function UserMessage({ message }: UserMessageProps) {
         <div className="flex flex-row-reverse gap-4 w-full">
           <UserAvatar user={user} />
           <MessageContent className="bg-muted text-primary max-w-[85%] rounded-3xl px-5 py-2.5 sm:max-w-[75%]">
-            {message.content}
+            {message.parts
+              .map((part) => (part.type === 'text' ? part.text : ''))
+              .join('')}
           </MessageContent>
         </div>
         <MessageActions

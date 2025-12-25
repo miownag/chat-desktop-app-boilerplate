@@ -12,20 +12,17 @@ import {
 } from '@/components/ui/prompt-input';
 import useCreateConversation from '@/hooks/apis/use-create-conversation';
 import { useRefreshConversationList } from '@/hooks/apis/use-get-conversation-list';
-import type { OnRequestParams } from '@/hooks/use-chat';
+import type { ChatHookType } from '@/hooks/use-chat';
 import { useShallowChatBotStore } from '@/stores';
 import { Separator } from '../ui/separator';
 
-interface SenderProps {
+type SenderProps = {
   enableDeepThink: boolean;
   setEnableDeepThink: React.Dispatch<React.SetStateAction<boolean>>;
   enableSearch: boolean;
   setEnableSearch: React.Dispatch<React.SetStateAction<boolean>>;
   isActive: boolean;
-  onRequest: (params: OnRequestParams) => void;
-  isRequesting: boolean;
-  abort: () => void;
-}
+} & Pick<ChatHookType, 'sendMessage' | 'status' | 'stop'>;
 
 function Sender(props: SenderProps) {
   const {
@@ -34,9 +31,9 @@ function Sender(props: SenderProps) {
     enableSearch,
     setEnableSearch,
     isActive,
-    onRequest,
-    isRequesting,
-    abort,
+    sendMessage,
+    status,
+    stop,
   } = props;
   const [prompt, setPrompt] = useState('');
   const { currentConversationId, setCurrentConversationId, setPendingMessage } =
@@ -66,20 +63,20 @@ function Sender(props: SenderProps) {
       return;
     }
 
-    // Add user message immediately
-    const newUserMessage = {
-      id: `msg-${crypto.randomUUID()}`,
-      role: 'user',
-      content: trimmedPrompt,
-      status: 'completed' as const,
-    };
-
-    onRequest({
-      message: newUserMessage,
-      enableDeepThink,
-      enableSearch,
-    });
+    sendMessage(
+      {
+        text: trimmedPrompt,
+      },
+      {
+        body: {
+          enableDeepThink,
+          enableSearch,
+        },
+      },
+    );
   };
+
+  const isRequesting = status === 'streaming' || status === 'submitted';
 
   return (
     isActive && (
@@ -151,7 +148,7 @@ function Sender(props: SenderProps) {
                   <Button
                     size="icon"
                     disabled={!prompt.trim() && !isRequesting}
-                    onClick={isRequesting ? abort : handleSubmit}
+                    onClick={isRequesting ? stop : handleSubmit}
                     className={`size-9 rounded-full cursor-pointer`}
                   >
                     {!isRequesting ? (

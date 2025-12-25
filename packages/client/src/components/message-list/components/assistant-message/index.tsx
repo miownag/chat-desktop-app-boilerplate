@@ -15,21 +15,31 @@ import {
   MessageActions,
   MessageContent,
 } from '@/components/ui/message';
-
-import type { Message as MessageType } from '@/hooks/use-chat';
+import type { ChatHookType } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
+import MessagePartRenderer from '../message-renderer';
 
 interface AssistantMessageProps {
-  message: MessageType;
+  message: ChatHookType['messages'][0];
   isLastMessage?: boolean;
 }
 
-function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
+function AssistantMessage({
+  message,
+  isLastMessage,
+  regenerate,
+}: AssistantMessageProps & {
+  regenerate: (options?: { messageId?: string | undefined }) => Promise<void>;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(message.content);
+      await navigator.clipboard.writeText(
+        message.parts
+          .map((part) => (part.type === 'text' ? part.text : ''))
+          .join(''),
+      );
       setCopied(true);
       setTimeout(() => {
         setCopied(false);
@@ -40,7 +50,7 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
   };
 
   const handleFeedback = (actionType: 'like' | 'dislike') => {
-    const status = message.feedback;
+    const status = message.metadata?.feedback;
     if (
       (status === 'liked' && actionType === 'like') ||
       (status === 'disliked' && actionType === 'dislike')
@@ -52,7 +62,7 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
   };
 
   const handleOnRegenerate = () => {
-    // TODO: send and update
+    regenerate({ messageId: message.id });
   };
 
   return (
@@ -61,15 +71,14 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
       className="mx-auto flex w-full max-w-3xl flex-col gap-2 items-start"
     >
       <div className="group flex w-full flex-col gap-0">
-        <MessageContent
-          className="text-foreground prose flex-1 rounded-lg bg-transparent p-0"
-          markdown
-        >
-          {message.content}
+        <MessageContent className="text-foreground prose flex-1 rounded-lg bg-transparent p-0">
+          {message.parts.map((part, index) => (
+            <MessagePartRenderer key={`${part.type}-${index}`} part={part} />
+          ))}
         </MessageContent>
         <MessageActions
           className={cn(
-            'ml-10 flex gap-0 opacity-0 group-hover:opacity-100',
+            'flex gap-0 opacity-0 group-hover:opacity-100',
             isLastMessage && 'opacity-100',
           )}
         >
@@ -115,7 +124,7 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
               className="rounded-full cursor-pointer"
               onClick={() => handleFeedback('like')}
             >
-              {message.feedback === 'liked' ? (
+              {message.metadata?.feedback === 'liked' ? (
                 <RiThumbUpFill />
               ) : (
                 <RiThumbUpLine />
@@ -129,7 +138,7 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
               className="rounded-full cursor-pointer"
               onClick={() => handleFeedback('dislike')}
             >
-              {message.feedback === 'disliked' ? (
+              {message.metadata?.feedback === 'disliked' ? (
                 <RiThumbDownFill />
               ) : (
                 <RiThumbDownLine />

@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import type { Message } from '@/hooks/use-chat';
+import type { ChatHookType } from '@/hooks/use-chat';
 import { ChatContainerContent, ChatContainerRoot } from '../ui/chat-container';
 import { ScrollButton } from '../ui/scroll-button';
 import Welcome from '../welcome';
@@ -14,11 +14,12 @@ export type ChatMessage = {
 };
 
 interface MessageListProps {
-  messages: Message[];
+  messages: ChatHookType['messages'];
   isActive: boolean;
+  regenerate: ChatHookType['regenerate'];
 }
 
-function MessageList({ messages, isActive }: MessageListProps) {
+function MessageList({ messages, isActive, regenerate }: MessageListProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   if (!isActive) {
@@ -32,12 +33,13 @@ function MessageList({ messages, isActive }: MessageListProps) {
     >
       <ChatContainerRoot className="h-full">
         <ChatContainerContent className="space-y-0 pr-4 py-12">
-          {messages.map((message: Message, index: number) =>
+          {messages.map((message, index) =>
             message.role === 'assistant' ? (
               <AssistantMessage
                 key={message.id}
                 message={message}
                 isLastMessage={index === messages.length - 1}
+                regenerate={regenerate}
               />
             ) : (
               <UserMessage key={message.id} message={message} />

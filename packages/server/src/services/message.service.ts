@@ -47,6 +47,7 @@ export class MessageService {
     content: string,
   ): Promise<Message | null> {
     // Verify conversation ownership
+    console.log('step1');
     const [conv] = await db
       .select({ userId: conversation.userId })
       .from(conversation)
@@ -55,6 +56,8 @@ export class MessageService {
     if (!conv || conv.userId !== userId) {
       return null;
     }
+
+    console.log('step2', conv);
 
     const id = crypto.randomUUID();
     const now = new Date();
@@ -71,11 +74,15 @@ export class MessageService {
       })
       .returning();
 
+    console.log('step3', newMessage);
+
     // Update conversation's updatedAt
     await db
       .update(conversation)
       .set({ updatedAt: now })
       .where(eq(conversation.id, conversationId));
+
+    console.log('step4');
 
     return {
       id: newMessage.id,
