@@ -72,15 +72,19 @@ async function deleteConversation(
   return await response.json();
 }
 
-async function sendMessage(
+async function sendMessage(config: {
   params: {
     conversationId: string;
     content: string;
-  },
-  onMessage?: (chunk: string) => void,
-  onComplete?: (fullMessage: string) => void,
-  onError?: (error: Error) => void,
-): Promise<ReadableStream<Uint8Array> | undefined> {
+    enableDeepThink: boolean;
+    enableSearch: boolean;
+  };
+  signal: AbortSignal;
+  onMessage: (chunk: string) => void;
+  onComplete: (fullMessage: string) => void;
+  onError: (error: Error) => void;
+}): Promise<ReadableStream<Uint8Array> | undefined> {
+  const { params, signal, onMessage, onComplete, onError } = config;
   try {
     const response = await fetchWithAuth(`${BASE_URL}/messages/send`, {
       method: 'POST',
@@ -88,6 +92,7 @@ async function sendMessage(
         Accept: 'text/event-stream',
       },
       body: JSON.stringify(params),
+      signal,
     });
 
     if (!response.ok) {
@@ -107,6 +112,7 @@ async function sendMessage(
       try {
         while (true) {
           const { done, value } = await reader.read();
+          console.log('done', done);
           if (done) {
             onComplete?.(fullMessage);
             break;
@@ -115,6 +121,7 @@ async function sendMessage(
           const chunk = decoder.decode(value, { stream: true });
           const lines = chunk.split('\n');
 
+          console.log('lines', lines);
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const data = line.slice(6).trim();
@@ -124,13 +131,13 @@ async function sendMessage(
               }
               try {
                 const parsed = JSON.parse(data);
-                const content = parsed.content || parsed.delta || '';
+                const content =
+                  parsed.data?.content || parsed.content || parsed.delta || '';
                 if (content) {
                   fullMessage += content;
                   onMessage?.(content);
                 }
               } catch {
-                // 忽略解析错误的行
                 console.warn('Failed to parse SSE data:', data);
               }
             }
@@ -145,7 +152,6 @@ async function sendMessage(
     return response.body;
   } catch (error) {
     onError?.(error as Error);
-    throw error;
   }
 }
 

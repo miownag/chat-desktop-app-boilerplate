@@ -13,9 +13,9 @@ import {
   Message,
   MessageAction,
   MessageActions,
-  MessageAvatar,
   MessageContent,
 } from '@/components/ui/message';
+
 import type { Message as MessageType } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
 
@@ -61,15 +61,12 @@ function AssistantMessage({ message, isLastMessage }: AssistantMessageProps) {
       className="mx-auto flex w-full max-w-3xl flex-col gap-2 items-start"
     >
       <div className="group flex w-full flex-col gap-0">
-        <div className="flex gap-4 w-full">
-          <MessageAvatar src="https://github.com/ibelick.png" alt="Ibelick" />
-          <MessageContent
-            className="text-foreground prose flex-1 rounded-lg bg-transparent p-0"
-            markdown
-          >
-            {message.content}
-          </MessageContent>
-        </div>
+        <MessageContent
+          className="text-foreground prose flex-1 rounded-lg bg-transparent p-0"
+          markdown
+        >
+          {message.content}
+        </MessageContent>
         <MessageActions
           className={cn(
             'ml-10 flex gap-0 opacity-0 group-hover:opacity-100',

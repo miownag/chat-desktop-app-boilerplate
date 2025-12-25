@@ -29,7 +29,7 @@ function AppSidebar() {
     useDeleteConversation({
       onSuccess: () => {
         if (alertId === currentConversationId) {
-          setCurrentConversationId(null);
+          setCurrentConversationId('new');
         }
       },
     });

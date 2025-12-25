@@ -5,6 +5,7 @@ import Sender from '@/components/sender';
 import useGetMessages from '@/hooks/apis/use-get-messages';
 import useChat from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
+import { sendMessage } from '@/services';
 import { useShallowChatBotStore } from '@/stores';
 
 function MainBox({
@@ -21,35 +22,36 @@ function MainBox({
   );
 
   const { isRequesting, onRequest, messages, setMessages, abort } = useChat({
-    requestFn: (messages, enableDeepThink, enableSearch, signal) => {
-      console.log('params', {
-        messages,
-        enableDeepThink,
-        enableSearch,
+    requestFn: async ({
+      message,
+      enableDeepThink,
+      enableSearch,
+      signal,
+      onSuccess,
+      onError,
+      onUpdate,
+    }) => {
+      sendMessage({
+        params: {
+          conversationId,
+          content: message.content,
+          enableDeepThink,
+          enableSearch,
+        },
         signal,
-      });
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            id: Date.now().toString(),
-            content: `## Hello World!
-          
-This message supports **bold text**, *italics*, and other Markdown features:
-
-- Bullet points
-- Code blocks
-- [Links](https://example.com)
-
-\`\`\`js
-// Even code with syntax highlighting
-function hello() {
-  return "world";
-}
-\`\`\`
-`,
-            role: 'assistant',
+        onMessage: (chunk) => {
+          console.log('onMessage123123', chunk);
+          onUpdate(chunk);
+        },
+        onComplete: (fullMessage) => {
+          onSuccess({
+            content: fullMessage,
+            status: 'completed',
           });
-        }, 1000);
+        },
+        onError: (error) => {
+          onError(error);
+        },
       });
     },
   });
@@ -75,6 +77,7 @@ function hello() {
         id: `msg-${crypto.randomUUID()}`,
         role: 'user',
         content: pendingMessage,
+        status: 'completed' as const,
       };
       setPendingMessage(null);
       onRequest({

@@ -35,111 +35,121 @@ messages.get(
 );
 
 // Send message (with SSE response)
-messages.post('/send', async (c) => {
-  const user = c.get('user');
-  if (!user) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
+messages.post(
+  '/send',
+  zValidator(
+    'json',
+    z.object({
+      conversationId: z.string(),
+      content: z.string(),
+      enableDeepThink: z.boolean().optional(),
+      enableSearch: z.boolean().optional(),
+    }),
+  ),
+  async (c) => {
+    const user = c.get('user');
+    if (!user) {
+      return c.json({ error: 'Unauthorized' }, 401);
+    }
 
-  const body = await c.req.json<{
-    conversationId: string;
-    content: string;
-    context?: {
-      systemPrompt?: string;
-      temperature?: number;
-      maxTokens?: number;
-    };
-  }>();
+    const body = await c.req.json<{
+      conversationId: string;
+      content: string;
+      enableDeepThink?: boolean;
+      enableSearch?: boolean;
+    }>();
 
-  const { conversationId, content } = body;
+    const { conversationId, content, enableDeepThink, enableSearch } = body;
 
-  if (!conversationId || !content) {
-    return c.json({ error: 'conversationId and content are required' }, 400);
-  }
+    if (!conversationId || !content) {
+      return c.json({ error: 'conversationId and content are required' }, 400);
+    }
 
-  // Add user message
-  const userMessage = await MessageService.addMessage(
-    conversationId,
-    user.id,
-    'user',
-    content,
-  );
+    // Add user message
+    const userMessage = await MessageService.addMessage(
+      conversationId,
+      user.id,
+      'user',
+      content,
+    );
 
-  if (!userMessage) {
-    return c.json({ error: 'Failed to add message' }, 500);
-  }
+    if (!userMessage) {
+      return c.json({ error: 'Failed to add message' }, 500);
+    }
 
-  // Set up SSE headers
-  c.header('Content-Type', 'text/event-stream');
-  c.header('Cache-Control', 'no-cache');
-  c.header('Connection', 'keep-alive');
+    // Set up SSE headers
+    c.header('Content-Type', 'text/event-stream');
+    c.header('Cache-Control', 'no-cache');
+    c.header('Connection', 'keep-alive');
 
-  // Create a readable stream for SSE
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        // Send initial event
-        controller.enqueue(
-          `data: ${JSON.stringify({
-            type: 'user_message',
-            data: userMessage,
-          })}\n\n`,
-        );
+    // Create a readable stream for SSE
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Send initial event
+          controller.enqueue(
+            `data: ${JSON.stringify({
+              type: 'user_message',
+              data: userMessage,
+            })}\n\n`,
+          );
 
-        // Simulate LLM processing delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
+          // Simulate LLM processing delay
+          await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Simulate streaming response chunks
-        const responseText = `I received your message: "${content}". This is a mock response from the LLM.`;
-        const chunks = responseText.split(' ');
+          // Simulate streaming response chunks
+          const responseText = `I received your message: "${content}". This is a mock response from the LLM.
+Your **${enableDeepThink ? 'wanna' : 'dont wanna'}** deep think. And your search config is ${enableSearch}.`;
+          const chunks = responseText.split(' ');
 
-        for (let i = 0; i < chunks.length; i++) {
-          const chunk = chunks[i];
-          const eventData = {
-            type: 'assistant_message_chunk',
-            data: {
-              content: chunk + (i < chunks.length - 1 ? ' ' : ''),
-              done: i === chunks.length - 1,
-            },
-          };
+          for (let i = 0; i < chunks.length; i++) {
+            const chunk = chunks[i];
+            const eventData = {
+              type: 'assistant_message_chunk',
+              data: {
+                content: chunk + (i < chunks.length - 1 ? ' ' : ''),
+                done: i === chunks.length - 1,
+              },
+            };
 
-          controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
+            controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
 
-          // Small delay between chunks to simulate streaming
-          await new Promise((resolve) => setTimeout(resolve, 50));
+            // Small delay between chunks to simulate streaming
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+
+          // Add assistant message to database
+          const assistantMessage = await MessageService.addMessage(
+            conversationId,
+            user.id,
+            'assistant',
+            responseText,
+          );
+
+          // Send completion event
+          controller.enqueue(
+            `data: ${JSON.stringify({
+              type: 'assistant_message',
+              data: assistantMessage,
+            })}\n\n`,
+          );
+          controller.enqueue(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
+
+          controller.close();
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
+          controller.enqueue(
+            `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
+          );
+          controller.close();
         }
+      },
+    });
 
-        // Add assistant message to database
-        const assistantMessage = await MessageService.addMessage(
-          conversationId,
-          user.id,
-          'assistant',
-          responseText,
-        );
-
-        // Send completion event
-        controller.enqueue(
-          `data: ${JSON.stringify({
-            type: 'assistant_message',
-            data: assistantMessage,
-          })}\n\n`,
-        );
-        controller.enqueue(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
-
-        controller.close();
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        controller.enqueue(
-          `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
-        );
-        controller.close();
-      }
-    },
-  });
-
-  return c.body(stream);
-});
+    return c.body(stream);
+  },
+);
 
 messages.post(
   '/feedback',

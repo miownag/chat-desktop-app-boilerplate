@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/prompt-input';
 import useCreateConversation from '@/hooks/apis/use-create-conversation';
 import { useRefreshConversationList } from '@/hooks/apis/use-get-conversation-list';
-import type { Message, OnRequestParams } from '@/hooks/use-chat';
+import type { OnRequestParams } from '@/hooks/use-chat';
 import { useShallowChatBotStore } from '@/stores';
 import { Separator } from '../ui/separator';
 
@@ -22,7 +22,7 @@ interface SenderProps {
   enableSearch: boolean;
   setEnableSearch: React.Dispatch<React.SetStateAction<boolean>>;
   isActive: boolean;
-  onRequest: (params: OnRequestParams<Message>) => void;
+  onRequest: (params: OnRequestParams) => void;
   isRequesting: boolean;
   abort: () => void;
 }
@@ -71,6 +71,7 @@ function Sender(props: SenderProps) {
       id: `msg-${crypto.randomUUID()}`,
       role: 'user',
       content: trimmedPrompt,
+      status: 'completed' as const,
     };
 
     onRequest({

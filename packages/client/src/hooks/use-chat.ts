@@ -1,53 +1,61 @@
 import { useCallback, useRef, useState } from 'react';
 
 type Message = {
-  id: string | number;
+  id: string;
   role: string;
   content: string;
+  status: 'pending' | 'completed' | 'error';
+  reason?: string;
   feedback?: 'liked' | 'disliked';
 };
 
-type OnRequestParams<TMessage extends Message> = {
-  message: TMessage;
+type OnRequestParams = {
+  message: Message;
   enableDeepThink: boolean;
   enableSearch: boolean;
 };
 
-type UseChatOptions<TMessage extends Message, TParsedMessage> = {
+type UseChatOptions<TParsedMessage> = {
   // Request function that sends messages to the server
-  requestFn: (
-    messages: TMessage,
-    enableDeepThink: boolean,
-    enableSearch: boolean,
-    signal: AbortSignal,
-  ) => Promise<TMessage | TMessage[]>;
+  requestFn: (params: {
+    message: Message;
+    enableDeepThink: boolean;
+    enableSearch: boolean;
+    signal: AbortSignal;
+    // Callback to update partial messages as they arrive
+    onUpdate: (chunk: string) => void;
+    // Callback when the request completes
+    onSuccess: (message: Pick<Message, 'content' | 'status'>) => void;
+    // Callback when the request errors
+    onError: (error: Error) => void;
+  }) => Promise<void>;
   // Initial history messages
-  historyMessages?: TMessage[];
+  historyMessages?: Message[];
   // Message transformer to convert raw messages to parsed format
-  messageTransformer?: (messages: TMessage[]) => TParsedMessage[];
+  messageTransformer?: (messages: Message[]) => TParsedMessage[];
 };
 
-type UseChatReturn<TMessage extends Message, TParsedMessage> = {
+type UseChatReturn<TParsedMessage> = {
   // Abort the current request
   abort: () => void;
   // Whether a request is in progress
   isRequesting: boolean;
   // Raw messages array
-  messages: TMessage[];
+  messages: Message[];
   // Transformed messages using the provided transformer
   parsedMessages: TParsedMessage[];
   // Trigger a request with optional new message
-  onRequest: (params: OnRequestParams<TMessage>) => Promise<void>;
+  onRequest: (params: OnRequestParams) => Promise<void>;
   // Directly set messages without triggering a request
-  setMessages: React.Dispatch<React.SetStateAction<TMessage[]>>;
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
 };
 
-function useChat<TMessage extends Message, TParsedMessage = TMessage>(
-  options: UseChatOptions<TMessage, TParsedMessage>,
-): UseChatReturn<TMessage, TParsedMessage> {
+function useChat<TParsedMessage = Message>(
+  options: UseChatOptions<TParsedMessage>,
+): UseChatReturn<TParsedMessage> {
   const { requestFn, historyMessages = [], messageTransformer } = options;
 
-  const [messages, setMessages] = useState<TMessage[]>(historyMessages);
+  const [messages, setMessages] = useState<Message[]>(historyMessages);
   const [isRequesting, setIsRequesting] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -62,7 +70,7 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
 
   // Trigger a request with optional new message
   const onRequest = useCallback(
-    async (params: OnRequestParams<TMessage>) => {
+    async (params: OnRequestParams) => {
       const { message, enableDeepThink, enableSearch } = params;
       // Abort any existing request
       abort();
@@ -72,28 +80,115 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
       abortControllerRef.current = controller;
 
       // Add new message to the list if provided
-      let currentMessages = messages;
       if (message) {
-        currentMessages = [...messages, message];
-        setMessages(currentMessages);
+        setMessages((prev) => {
+          console.log('3', [...prev, message]);
+          return [...prev, message];
+        });
       }
 
       setIsRequesting(true);
 
       try {
-        const response = await requestFn(
+        await requestFn({
           message,
           enableDeepThink,
           enableSearch,
-          controller.signal,
-        );
+          signal: controller.signal,
+          onUpdate: (chunk: string, id?: string) => {
+            console.log('chunk1', chunk);
+            setMessages((prev) => {
+              if (prev[prev.length - 1].role === 'user') {
+                console.log('1', [
+                  ...prev,
+                  {
+                    id: id || crypto.randomUUID(),
+                    role: 'assistant',
+                    content: chunk,
+                    status: 'pending',
+                  },
+                ]);
+                return [
+                  ...prev,
+                  {
+                    id: id || crypto.randomUUID(),
+                    role: 'assistant',
+                    content: chunk,
+                    status: 'pending',
+                  },
+                ];
+              } else if (
+                prev[prev.length - 1].role === 'assistant' &&
+                prev[prev.length - 1].status === 'pending'
+              ) {
+                console.log('2', [
+                  ...prev.slice(0, -1),
+                  {
+                    ...prev[prev.length - 1],
+                    content: prev[prev.length - 1].content + chunk,
+                  },
+                ]);
+                return [
+                  ...prev.slice(0, -1),
+                  {
+                    ...prev[prev.length - 1],
+                    content: prev[prev.length - 1].content + chunk,
+                  },
+                ];
+              }
+              return prev;
+            });
+          },
+          onSuccess: (message: Pick<Message, 'content' | 'status'>) => {
+            setMessages((prev) => {
+              console.log('4', [
+                ...prev.slice(0, -1),
+                {
+                  id: prev[prev.length - 1].id,
+                  role: 'assistant',
+                  status: message.status || 'completed',
+                  content: message.content || '',
+                },
+              ]);
+              return [
+                ...prev.slice(0, -1),
+                {
+                  id: prev[prev.length - 1].id,
+                  role: 'assistant',
+                  status: message.status || 'completed',
+                  content: message.content || '',
+                },
+              ];
+            });
+          },
+          onError: (error: Error) => {
+            setMessages((prev) => {
+              console.log('5', [
+                ...prev.slice(0, -1),
+                {
+                  ...prev[prev.length - 1],
+                  status: 'error',
+                  reason: error.message || 'Unknown error',
+                },
+              ]);
+              return [
+                ...prev.slice(0, -1),
+                {
+                  ...prev[prev.length - 1],
+                  status: 'error',
+                  reason: error.message || 'Unknown error',
+                },
+              ];
+            });
+          },
+        });
 
         // Handle response - can be single message or array
-        const responseMessages = Array.isArray(response)
-          ? response
-          : [response];
+        // const responseMessages = Array.isArray(response)
+        //   ? response
+        //   : [response];
 
-        setMessages((prev) => [...prev, ...responseMessages]);
+        // setMessages((prev) => [...prev, ...responseMessages]);
       } catch (error) {
         // Don't throw if the request was aborted
         if (error instanceof Error && error.name === 'AbortError') {
@@ -105,7 +200,7 @@ function useChat<TMessage extends Message, TParsedMessage = TMessage>(
         abortControllerRef.current = null;
       }
     },
-    [messages, requestFn, abort],
+    [requestFn, abort],
   );
 
   // Compute parsed messages using the transformer

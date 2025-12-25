@@ -31,7 +31,7 @@ function MessageList({ messages, isActive }: MessageListProps) {
       className="relative flex-1 overflow-y-auto w-2xl"
     >
       <ChatContainerRoot className="h-full">
-        <ChatContainerContent className="space-y-0 px-5 py-12">
+        <ChatContainerContent className="space-y-0 pr-4 py-12">
           {messages.map((message: Message, index: number) =>
             message.role === 'assistant' ? (
               <AssistantMessage
@@ -44,8 +44,8 @@ function MessageList({ messages, isActive }: MessageListProps) {
             ),
           )}
         </ChatContainerContent>
-        <div className="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-end px-5">
-          <ScrollButton className="shadow-sm" />
+        <div className="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
+          <ScrollButton className="shadow-sm cursor-pointer" />
         </div>
       </ChatContainerRoot>
     </div>

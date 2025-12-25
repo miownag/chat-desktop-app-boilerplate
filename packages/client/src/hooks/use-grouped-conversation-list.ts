@@ -21,6 +21,9 @@ function useGroupedConversationList(pageConfig: {
     ]),
   );
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
     if (
       data?.data?.data?.length &&
       currentConversationId !== 'new' &&
@@ -29,8 +32,18 @@ function useGroupedConversationList(pageConfig: {
     ) {
       setCurrentConversationId(data.data.data[0].id);
       addLoadedConversationIds([data.data.data[0].id]);
+      return;
+    }
+    if (
+      !data?.data?.data?.length ||
+      (currentConversationId &&
+        currentConversationId !== 'new' &&
+        !data.data.data.map((item) => item.id).includes(currentConversationId))
+    ) {
+      setCurrentConversationId('new');
     }
   }, [
+    isLoading,
     data?.data?.data,
     setCurrentConversationId,
     addLoadedConversationIds,
