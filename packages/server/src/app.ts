@@ -2,8 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { auth } from './lib/auth';
 import { errorHandler, requestLogger, responseWrapper } from './middleware';
-import sessionRoutes from './routes/conversations';
-import healthRoutes from './routes/health';
+import conversationRoutes from './routes/conversations';
 import messageRoutes from './routes/messages';
 
 const app = new Hono();
@@ -14,7 +13,7 @@ app.use(
   cors({
     origin: ['http://localhost:1420', 'tauri://localhost'],
     credentials: true,
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'User-Agent'],
     allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   }),
 );
@@ -32,22 +31,8 @@ app.use('/api/messages/*', responseWrapper);
 app.use('/health/*', responseWrapper);
 
 // Routes
-app.route('/health', healthRoutes);
-app.route('/api/conversations', sessionRoutes);
+app.route('/api/conversations', conversationRoutes);
 app.route('/api/messages', messageRoutes);
-
-// Root route
-app.get('/', (c) => {
-  return c.json({
-    message: 'Chat Desktop App API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/health',
-      conversations: '/api/conversations',
-      messages: '/api/messages',
-    },
-  });
-});
 
 // 404 handler
 app.notFound((c) => {

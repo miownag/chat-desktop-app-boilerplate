@@ -1,8 +1,9 @@
 import { zValidator } from '@hono/zod-validator';
+import type { UIMessage } from 'ai';
 import { Hono } from 'hono';
 import z from 'zod';
 import { authMiddleware } from '../middleware';
-import { MessageService } from '../services';
+import { AIService, ConversationService, MessageService } from '../services';
 import type { Message } from '../types';
 import type { AppContext } from '../types/context';
 
@@ -46,7 +47,7 @@ messages.post(
         parts: z.array(
           z.object({
             type: z.string(),
-            text: z.string(),
+            text: z.string().optional(),
           }),
         ),
         role: z.enum(['user', 'assistant', 'system']),
@@ -67,89 +68,26 @@ messages.post(
       return c.json({ error: 'id and message are required' }, 400);
     }
 
-    // Add user message
-    const userMessage = await MessageService.addMessage(
-      id,
-      user.id,
-      message.role,
-      message.parts.map((part) => part.text).join(''),
-    );
-
-    if (!userMessage) {
-      return c.json({ error: 'Failed to add message' }, 500);
+    // If the message sent is the first, update conversation's title
+    const hasMessage = await ConversationService.hasMessageInConversation(id);
+    if (!hasMessage) {
+      await ConversationService.updateConversation(id, user.id, {
+        title: message.parts
+          .filter((part) => part.type === 'text')
+          .map((part) => part.text || '')
+          .join(''),
+      });
     }
 
-    // Set up SSE headers
-    c.header('Content-Type', 'text/event-stream');
-    c.header('Cache-Control', 'no-cache');
-    c.header('Connection', 'keep-alive');
-
-    // Create a readable stream for SSE
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          // Send initial event
-          controller.enqueue(
-            `data: ${JSON.stringify({
-              type: 'user_message',
-              data: userMessage,
-            })}\n\n`,
-          );
-
-          // Simulate LLM processing delay
-          await new Promise((resolve) => setTimeout(resolve, 500));
-
-          // Simulate streaming response chunks
-          const responseText = `I received your message: "${message.parts.map((part) => part.text).join('')}". This is a mock response from the LLM.
-Your **${enableDeepThink ? 'wanna' : 'dont wanna'}** deep think. And your search config is ${enableSearch}.`;
-          const chunks = responseText.split(' ');
-
-          for (let i = 0; i < chunks.length; i++) {
-            const chunk = chunks[i];
-            const eventData = {
-              type: 'assistant_message_chunk',
-              data: {
-                content: chunk + (i < chunks.length - 1 ? ' ' : ''),
-                done: i === chunks.length - 1,
-              },
-            };
-
-            controller.enqueue(`data: ${JSON.stringify(eventData)}\n\n`);
-
-            // Small delay between chunks to simulate streaming
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
-
-          // Add assistant message to database
-          const assistantMessage = await MessageService.addMessage(
-            id,
-            user.id,
-            'assistant',
-            responseText,
-          );
-
-          // Send completion event
-          controller.enqueue(
-            `data: ${JSON.stringify({
-              type: 'assistant_message',
-              data: assistantMessage,
-            })}\n\n`,
-          );
-          controller.enqueue(`data: ${JSON.stringify({ type: 'done' })}\n\n`);
-
-          controller.close();
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : 'Unknown error';
-          controller.enqueue(
-            `data: ${JSON.stringify({ type: 'error', error: errorMessage })}\n\n`,
-          );
-          controller.close();
-        }
-      },
+    const response = await AIService.sendMessage({
+      conversationId: id,
+      userId: user.id,
+      message: message as UIMessage,
+      enableDeepThink,
+      enableSearch,
     });
 
-    return c.body(stream);
+    return response;
   },
 );
 

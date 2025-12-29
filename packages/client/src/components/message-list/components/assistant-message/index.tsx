@@ -21,16 +21,17 @@ import MessagePartRenderer from '../message-renderer';
 
 interface AssistantMessageProps {
   message: ChatHookType['messages'][0];
+  status: ChatHookType['status'];
   isLastMessage?: boolean;
+  regenerate: (options?: { messageId?: string | undefined }) => Promise<void>;
 }
 
 function AssistantMessage({
   message,
   isLastMessage,
+  status,
   regenerate,
-}: AssistantMessageProps & {
-  regenerate: (options?: { messageId?: string | undefined }) => Promise<void>;
-}) {
+}: AssistantMessageProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -76,76 +77,78 @@ function AssistantMessage({
             <MessagePartRenderer key={`${part.type}-${index}`} part={part} />
           ))}
         </MessageContent>
-        <MessageActions
-          className={cn(
-            'flex gap-0 opacity-0 group-hover:opacity-100',
-            isLastMessage && 'opacity-100',
-          )}
-        >
-          {isLastMessage && (
-            <MessageAction tooltip="Re-Generate" delayDuration={100}>
+        {((isLastMessage && status === 'ready') || !isLastMessage) && (
+          <MessageActions
+            className={cn(
+              'flex gap-0 opacity-0 group-hover:opacity-100',
+              isLastMessage && 'opacity-100',
+            )}
+          >
+            {isLastMessage && (
+              <MessageAction tooltip="Re-Generate" delayDuration={100}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full cursor-pointer"
+                  onClick={handleOnRegenerate}
+                >
+                  <AiOutlineSync />
+                </Button>
+              </MessageAction>
+            )}
+            <MessageAction
+              tooltip={copied ? 'Copied!' : 'Copy'}
+              delayDuration={100}
+            >
+              {!copied ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full cursor-pointer"
+                  onClick={handleCopy}
+                >
+                  <LuCopy />
+                </Button>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="rounded-full cursor-pointer"
+                >
+                  <MdCheck color="green" />
+                </Button>
+              )}
+            </MessageAction>
+            <MessageAction tooltip="Upvote" delayDuration={100}>
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full cursor-pointer"
-                onClick={handleOnRegenerate}
+                onClick={() => handleFeedback('like')}
               >
-                <AiOutlineSync />
+                {message.metadata?.feedback === 'liked' ? (
+                  <RiThumbUpFill />
+                ) : (
+                  <RiThumbUpLine />
+                )}
               </Button>
             </MessageAction>
-          )}
-          <MessageAction
-            tooltip={copied ? 'Copied!' : 'Copy'}
-            delayDuration={100}
-          >
-            {!copied ? (
+            <MessageAction tooltip="Downvote" delayDuration={100}>
               <Button
                 variant="ghost"
                 size="icon"
                 className="rounded-full cursor-pointer"
-                onClick={handleCopy}
+                onClick={() => handleFeedback('dislike')}
               >
-                <LuCopy />
+                {message.metadata?.feedback === 'disliked' ? (
+                  <RiThumbDownFill />
+                ) : (
+                  <RiThumbDownLine />
+                )}
               </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full cursor-pointer"
-              >
-                <MdCheck color="green" />
-              </Button>
-            )}
-          </MessageAction>
-          <MessageAction tooltip="Upvote" delayDuration={100}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full cursor-pointer"
-              onClick={() => handleFeedback('like')}
-            >
-              {message.metadata?.feedback === 'liked' ? (
-                <RiThumbUpFill />
-              ) : (
-                <RiThumbUpLine />
-              )}
-            </Button>
-          </MessageAction>
-          <MessageAction tooltip="Downvote" delayDuration={100}>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full cursor-pointer"
-              onClick={() => handleFeedback('dislike')}
-            >
-              {message.metadata?.feedback === 'disliked' ? (
-                <RiThumbDownFill />
-              ) : (
-                <RiThumbDownLine />
-              )}
-            </Button>
-          </MessageAction>
-        </MessageActions>
+            </MessageAction>
+          </MessageActions>
+        )}
       </div>
     </Message>
   );

@@ -1,3 +1,4 @@
+import type { UIMessage } from 'ai';
 import { eq } from 'drizzle-orm';
 import { db } from '../db';
 import { conversation, message } from '../db/schema';
@@ -20,8 +21,8 @@ export class MessageService {
         id: message.id,
         conversationId: message.conversationId,
         role: message.role,
-        content: message.content,
-        feedback: message.feedback,
+        parts: message.parts,
+        metadata: message.metadata,
         createdAt: message.createdAt,
       })
       .from(message)
@@ -33,9 +34,9 @@ export class MessageService {
         id: m.id,
         conversationId: m.conversationId,
         role: m.role,
-        content: m.content,
+        parts: m.parts,
+        metadata: m.metadata,
         createdAt: String(m.createdAt.getTime()),
-        feedback: m.feedback as Message['feedback'],
       })) as Message[],
     };
   }
@@ -44,10 +45,10 @@ export class MessageService {
     conversationId: string,
     userId: string,
     role: 'user' | 'assistant' | 'system',
-    content: string,
+    parts: UIMessage['parts'],
+    metadata: Record<string, unknown> | null,
   ): Promise<Message | null> {
     // Verify conversation ownership
-    console.log('step1');
     const [conv] = await db
       .select({ userId: conversation.userId })
       .from(conversation)
@@ -56,8 +57,6 @@ export class MessageService {
     if (!conv || conv.userId !== userId) {
       return null;
     }
-
-    console.log('step2', conv);
 
     const id = crypto.randomUUID();
     const now = new Date();
@@ -68,13 +67,12 @@ export class MessageService {
         id,
         conversationId,
         role,
-        content,
+        parts,
+        metadata,
         createdAt: now,
         updatedAt: now,
       })
       .returning();
-
-    console.log('step3', newMessage);
 
     // Update conversation's updatedAt
     await db
@@ -82,15 +80,13 @@ export class MessageService {
       .set({ updatedAt: now })
       .where(eq(conversation.id, conversationId));
 
-    console.log('step4');
-
     return {
       id: newMessage.id,
       conversationId: newMessage.conversationId,
       role: newMessage.role,
-      content: newMessage.content,
+      parts: newMessage.parts,
       createdAt: String(newMessage.createdAt.getTime()),
-      feedback: newMessage.feedback as Message['feedback'],
+      metadata: newMessage.metadata,
     };
   }
 
@@ -149,7 +145,9 @@ export class MessageService {
     const [updated] = await db
       .update(message)
       .set({
-        feedback: feedbackValue,
+        metadata: {
+          feedback: feedbackValue || undefined,
+        },
         updatedAt: new Date(),
       })
       .where(eq(message.id, messageId))
@@ -161,9 +159,9 @@ export class MessageService {
       id: updated.id,
       conversationId: updated.conversationId,
       role: updated.role,
-      content: updated.content,
+      parts: updated.parts,
       createdAt: String(updated.createdAt.getTime()),
-      feedback: updated.feedback as Message['feedback'],
+      metadata: updated.metadata,
     };
   }
 }

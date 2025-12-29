@@ -73,6 +73,7 @@ function MainBox({
       <MessageList
         isActive={isActive}
         messages={messages}
+        status={status}
         regenerate={regenerate}
       />
       <Sender

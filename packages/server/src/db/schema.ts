@@ -1,7 +1,9 @@
+import type { UIMessage } from 'ai';
 import { relations } from 'drizzle-orm';
 import {
   boolean,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -81,11 +83,12 @@ export const message = pgTable('message', {
     .notNull()
     .references(() => conversation.id, { onDelete: 'cascade' }),
   role: messageRoleEnum('role').notNull(),
-  content: text('content').notNull(),
+  // Vercel AI SDK compatible fields
+  parts: jsonb('parts').$type<UIMessage['parts']>().notNull(),
   // For storing token usage or other metadata
   tokenCount: integer('token_count'),
-  // For tracking feedback
-  feedback: text('feedback'), // 'like' | 'dislike' | null
+  // Metadata JSON field for storing feedback and other custom data
+  metadata: jsonb('metadata').$type<{ feedback?: 'liked' | 'disliked' }>(),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });

@@ -15,11 +15,17 @@ export type ChatMessage = {
 
 interface MessageListProps {
   messages: ChatHookType['messages'];
+  status: ChatHookType['status'];
   isActive: boolean;
   regenerate: ChatHookType['regenerate'];
 }
 
-function MessageList({ messages, isActive, regenerate }: MessageListProps) {
+function MessageList({
+  messages,
+  status,
+  isActive,
+  regenerate,
+}: MessageListProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   if (!isActive) {
@@ -39,6 +45,7 @@ function MessageList({ messages, isActive, regenerate }: MessageListProps) {
                 key={message.id}
                 message={message}
                 isLastMessage={index === messages.length - 1}
+                status={status}
                 regenerate={regenerate}
               />
             ) : (

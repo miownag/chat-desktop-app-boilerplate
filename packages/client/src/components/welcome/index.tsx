@@ -9,11 +9,7 @@ function Welcome(props: { className?: string }) {
         props.className,
       )}
     >
-      <img
-        src="../../../public/bricks.png"
-        alt="Hello"
-        className="w-30 h-30 mb-4"
-      />
+      <img src="/bricks.png" alt="Hello" className="w-30 h-30 mb-4" />
       <Typewriter
         text="Hello, I'm Bricks. May I help you?"
         delay={100}

@@ -175,4 +175,14 @@ export class ConversationService {
       messageCount: count,
     };
   }
+
+  static async hasMessageInConversation(id: string): Promise<boolean> {
+    const [result] = await db
+      .select({ count: sql<number>`COUNT(*)::int` })
+      .from(message)
+      .where(eq(message.conversationId, id))
+      .limit(1);
+
+    return result?.count > 0;
+  }
 }

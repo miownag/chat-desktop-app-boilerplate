@@ -10,9 +10,12 @@ export interface Message {
   id: string;
   conversationId: string;
   role: 'user' | 'assistant' | 'system';
-  content: string;
+  parts: Array<{
+    type: string;
+    [key: string]: unknown;
+  }>;
   createdAt: string;
-  feedback?: 'liked' | 'disliked' | null;
+  metadata: Record<string, unknown> | null;
 }
 
 export interface PaginatedResponse<T> {
