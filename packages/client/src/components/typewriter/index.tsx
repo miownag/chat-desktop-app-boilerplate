@@ -2,7 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface TypewriterProps {
-  text: string;
+  textProps: {
+    baseText: string;
+    dynamicTexts: string[];
+  };
   speed?: number;
   delay?: number;
   loop?: boolean;
@@ -11,12 +14,11 @@ export interface TypewriterProps {
   cursorChar?: string;
   className?: string;
   cursorClassName?: string;
-  deleteEndIndex?: number;
   onComplete?: () => void;
 }
 
 const Typewriter = ({
-  text,
+  textProps,
   speed = 50,
   delay = 0,
   loop = false,
@@ -25,34 +27,38 @@ const Typewriter = ({
   cursorChar = '|',
   className,
   cursorClassName,
-  deleteEndIndex = 0,
   onComplete,
 }: TypewriterProps) => {
   const [currentText, setCurrentText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
-  const textRef = useRef(text);
+  const [dynamicTextIndex, setDynamicTextIndex] = useState(0);
+  const textPropsRef = useRef(textProps);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Update text when prop changes
   useEffect(() => {
-    textRef.current = text;
-    setCurrentText('');
+    textPropsRef.current = textProps;
+    setCurrentText(textProps.baseText);
     setCurrentIndex(0);
     setIsDeleting(false);
-  }, [text]);
+    setDynamicTextIndex(0);
+  }, [textProps]);
 
   useEffect(() => {
     const type = () => {
-      const currentText = textRef.current;
+      const { baseText, dynamicTexts } = textPropsRef.current;
+      const currentDynamicText = dynamicTexts[dynamicTextIndex];
+      const fullText = baseText + currentDynamicText;
       const currentSpeed = isDeleting ? speed / 2 : speed;
 
       if (!isDeleting) {
         // Typing forward
-        setCurrentText(currentText.substring(0, currentIndex + 1));
+        const targetLength = baseText.length + currentIndex + 1;
+        setCurrentText(fullText.substring(0, targetLength));
 
-        if (currentIndex + 1 === currentText.length) {
-          // Finished typing
+        if (targetLength === fullText.length) {
+          // Finished typing current dynamic text
           if (loop) {
             timerRef.current = setTimeout(() => {
               setIsDeleting(true);
@@ -65,13 +71,16 @@ const Typewriter = ({
           timerRef.current = setTimeout(type, currentSpeed);
         }
       } else {
-        // Deleting
-        setCurrentText(currentText.substring(0, currentIndex - 1));
+        // Deleting only the dynamic text part
+        const targetLength = baseText.length + currentIndex - 1;
+        setCurrentText(fullText.substring(0, targetLength));
         setCurrentIndex(currentIndex - 1);
 
-        if (currentIndex - 1 === deleteEndIndex) {
-          // Finished deleting
+        if (currentIndex - 1 === 0) {
+          // Finished deleting, move to next dynamic text
           setIsDeleting(false);
+          const nextIndex = (dynamicTextIndex + 1) % dynamicTexts.length;
+          setDynamicTextIndex(nextIndex);
           timerRef.current = setTimeout(type, speed);
         } else {
           timerRef.current = setTimeout(type, currentSpeed);
@@ -93,12 +102,12 @@ const Typewriter = ({
   }, [
     currentIndex,
     isDeleting,
+    dynamicTextIndex,
     speed,
     loop,
     loopDelay,
     delay,
     onComplete,
-    deleteEndIndex,
   ]);
 
   return (

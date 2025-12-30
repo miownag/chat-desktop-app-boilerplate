@@ -74,7 +74,14 @@ function AssistantMessage({
       <div className="group flex w-full flex-col gap-0">
         <MessageContent className="text-foreground prose flex-1 rounded-lg bg-transparent p-0">
           {message.parts.map((part, index) => (
-            <MessagePartRenderer key={`${part.type}-${index}`} part={part} />
+            <MessagePartRenderer
+              key={`${part.type}-${index}`}
+              part={part}
+              isThinking={
+                index === message.parts.length - 1 && status === 'streaming'
+              }
+              status={status}
+            />
           ))}
         </MessageContent>
         {((isLastMessage && status === 'ready') || !isLastMessage) && (
