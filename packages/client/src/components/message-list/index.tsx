@@ -1,10 +1,14 @@
 import { useRef } from 'react';
+import AssistantMessage from '@/components/message-list/components/assistant-message';
+import UserMessage from '@/components/message-list/components/user-message';
+import {
+  ChatContainerContent,
+  ChatContainerRoot,
+} from '@/components/ui/chat-container';
+import { Loader } from '@/components/ui/loader';
+import { ScrollButton } from '@/components/ui/scroll-button';
+import Welcome from '@/components/welcome';
 import type { ChatHookType } from '@/hooks/use-chat';
-import { ChatContainerContent, ChatContainerRoot } from '../ui/chat-container';
-import { ScrollButton } from '../ui/scroll-button';
-import Welcome from '../welcome';
-import AssistantMessage from './components/assistant-message';
-import UserMessage from './components/user-message';
 
 export type ChatMessage = {
   id: number;
@@ -52,6 +56,7 @@ function MessageList({
               <UserMessage key={message.id} message={message} />
             ),
           )}
+          {status === 'submitted' && <Loader variant="typing" />}
         </ChatContainerContent>
         <div className="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
           <ScrollButton className="shadow-sm cursor-pointer" />

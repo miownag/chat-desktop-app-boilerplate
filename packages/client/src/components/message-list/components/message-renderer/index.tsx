@@ -1,13 +1,12 @@
 import type { UIDataTypes, UIMessagePart, UITools } from 'ai';
 import type { Components } from 'react-markdown';
-import { Loader } from '@/components/ui/loader';
 import { Markdown } from '@/components/ui/markdown';
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
 } from '@/components/ui/reasoning';
-import type { ChatHookType } from '@/hooks/use-chat';
+import { Tool } from '@/components/ui/tool';
 
 const customComponents: Partial<Components> = {
   a: ({ children, href }) => (
@@ -24,15 +23,10 @@ const customComponents: Partial<Components> = {
 function MessageRenderer({
   part,
   isThinking,
-  status,
 }: {
   part: UIMessagePart<UIDataTypes, UITools>;
   isThinking: boolean;
-  status: ChatHookType['status'];
 }) {
-  if (status === 'submitted') {
-    return <Loader variant="typing" />;
-  }
   switch (part.type) {
     case 'text':
       return (
@@ -54,6 +48,37 @@ function MessageRenderer({
             {part.text}
           </ReasoningContent>
         </Reasoning>
+      );
+    case 'dynamic-tool':
+      return (
+        <Tool
+          className="w-full max-w-md"
+          toolPart={{
+            type: part.toolName,
+            state: ['approval-requested', 'approval-responded'].includes(
+              part.state,
+            )
+              ? 'input-available'
+              : (part.state as
+                  | 'input-streaming'
+                  | 'input-available'
+                  | 'output-available'
+                  | 'output-error'),
+            input:
+              typeof part.input === 'object' && part.input !== null
+                ? (part.input as Record<string, unknown>)
+                : {
+                    parameters: part.input,
+                  },
+            output:
+              typeof part.output === 'object' && part.output !== null
+                ? (part.output as Record<string, unknown>)
+                : {
+                    parameters: part.output,
+                  },
+            errorText: part.errorText,
+          }}
+        />
       );
     default:
       return null;

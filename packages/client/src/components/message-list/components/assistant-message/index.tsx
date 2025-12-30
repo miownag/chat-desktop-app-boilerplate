@@ -8,6 +8,7 @@ import {
   RiThumbUpFill,
   RiThumbUpLine,
 } from 'react-icons/ri';
+import MessagePartRenderer from '@/components/message-list/components/message-renderer';
 import { Button } from '@/components/ui/button';
 import {
   Message,
@@ -17,7 +18,6 @@ import {
 } from '@/components/ui/message';
 import type { ChatHookType } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
-import MessagePartRenderer from '../message-renderer';
 
 interface AssistantMessageProps {
   message: ChatHookType['messages'][0];
@@ -80,7 +80,6 @@ function AssistantMessage({
               isThinking={
                 index === message.parts.length - 1 && status === 'streaming'
               }
-              status={status}
             />
           ))}
         </MessageContent>
