@@ -16,23 +16,32 @@ import {
   MessageActions,
   MessageContent,
 } from '@/components/ui/message';
+import useFeedback from '@/hooks/apis/use-feedback';
 import type { ChatHookType } from '@/hooks/use-chat';
 import { cn } from '@/lib/utils';
 
 interface AssistantMessageProps {
+  conversationId: string;
   message: ChatHookType['messages'][0];
   status: ChatHookType['status'];
   isLastMessage?: boolean;
   regenerate: (options?: { messageId?: string | undefined }) => Promise<void>;
+  onFeedbackUpdate: (
+    messageId: string,
+    feedback: 'liked' | 'disliked' | undefined,
+  ) => void;
 }
 
 function AssistantMessage({
+  conversationId,
   message,
   isLastMessage,
   status,
   regenerate,
+  onFeedbackUpdate,
 }: AssistantMessageProps) {
   const [copied, setCopied] = useState(false);
+  const { mutate: submitFeedbackMutation } = useFeedback();
 
   const handleCopy = async () => {
     try {
@@ -51,15 +60,36 @@ function AssistantMessage({
   };
 
   const handleFeedback = (actionType: 'like' | 'dislike') => {
-    const status = message.metadata?.feedback;
-    if (
-      (status === 'liked' && actionType === 'like') ||
-      (status === 'disliked' && actionType === 'dislike')
-    ) {
-      // TODO: cancel and update
-    } else {
-      // TODO: send and update
-    }
+    const currentFeedback = message.metadata?.feedback;
+    const action =
+      (currentFeedback === 'liked' && actionType === 'like') ||
+      (currentFeedback === 'disliked' && actionType === 'dislike')
+        ? 'cancel'
+        : 'submit';
+
+    submitFeedbackMutation(
+      {
+        conversationId,
+        messageId: message.id,
+        actionType,
+        action,
+      },
+      {
+        onSuccess: () => {
+          // Update local state
+          const newFeedback =
+            action === 'cancel'
+              ? undefined
+              : actionType === 'like'
+                ? 'liked'
+                : 'disliked';
+          onFeedbackUpdate(message.id, newFeedback);
+        },
+        onError: (error) => {
+          console.error('Failed to submit feedback:', error);
+        },
+      },
+    );
   };
 
   const handleOnRegenerate = () => {
@@ -85,10 +115,9 @@ function AssistantMessage({
         </MessageContent>
         {((isLastMessage && status === 'ready') || !isLastMessage) && (
           <MessageActions
-            className={cn(
-              'flex gap-0 opacity-0 group-hover:opacity-100',
-              isLastMessage && 'opacity-100',
-            )}
+            className={cn('flex gap-0 opacity-0 group-hover:opacity-100 mt-2', {
+              'opacity-100': isLastMessage,
+            })}
           >
             {isLastMessage && (
               <MessageAction tooltip="Re-Generate" delayDuration={100}>

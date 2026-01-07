@@ -1,5 +1,11 @@
-import { type LanguageModel, streamText, type UIMessage } from 'ai';
-import { ollama } from 'ollama-ai-provider-v2';
+import { toBaseMessages, toUIMessageStream } from '@ai-sdk/langchain';
+import { ChatOpenAI } from '@langchain/openai';
+import {
+  createUIMessageStream,
+  createUIMessageStreamResponse,
+  type UIMessage,
+} from 'ai';
+import { createAgent } from 'langchain';
 import { MessageService } from './message.service';
 
 export interface SendMessageOptions {
@@ -10,7 +16,13 @@ export interface SendMessageOptions {
   enableSearch?: boolean;
 }
 
-const model = ollama('qwen3:4b');
+const model = new ChatOpenAI({
+  model: 'qwen/qwen3-next-80b',
+  apiKey: '',
+  configuration: {
+    baseURL: 'http://10.2.37.87:1234/v1',
+  },
+});
 
 export class AIService {
   /**
@@ -20,8 +32,6 @@ export class AIService {
     const { conversationId, userId, message, enableDeepThink, enableSearch } =
       options;
 
-    console.log('--------> 查看入参', conversationId, message);
-    // Add user message to database
     const userMessage = await MessageService.addMessage(
       conversationId,
       userId,
@@ -34,51 +44,28 @@ export class AIService {
       throw new Error('Failed to add user message');
     }
 
-    // Extract text from parts for processing
-    const userText = message.parts
-      .filter((part) => part.type === 'text')
-      .map((part) => part.text as string)
-      .join('');
+    const agent = createAgent({
+      model,
+      tools: [],
+    });
 
-    // Get conversation history for context
-    const { data: historyMessages } = await MessageService.getMessages(
+    const { data: messages } = await MessageService.getMessages(
       conversationId,
       userId,
     );
+    const langchainMessages = await toBaseMessages(messages);
+    const langchainStream = await agent.stream(
+      { messages: langchainMessages },
+      { streamMode: ['values', 'messages'] },
+    );
 
-    // Convert to AI SDK message format (excluding the just-added user message)
-    const messages = historyMessages
-      .filter((m) => m.id !== userMessage.id)
-      .map((m) => ({
-        role: m.role,
-        content: m.parts
-          .filter((p) => p.type === 'text')
-          .map((p) => p.text as string)
-          .join(''),
-      }));
-
-    // Add current user message
-    messages.push({
-      role: 'user',
-      content: userText,
-    });
-
-    // Stream response from AI
-    const result = streamText({
-      model: model as LanguageModel,
-      providerOptions: {
-        ollama: {
-          think: enableDeepThink,
-        },
+    const stream = createUIMessageStream({
+      originalMessages: messages,
+      execute: ({ writer }) => {
+        writer.merge(toUIMessageStream(langchainStream) as never);
       },
-      prompt: userText,
-      temperature: 0.7,
-    });
-
-    return result.toUIMessageStreamResponse({
-      onFinish: async ({ messages }) => {
-        // Save assistant message to database when stream finishes
-        await MessageService.addMessage(
+      onFinish: ({ messages }) => {
+        MessageService.addMessage(
           conversationId,
           userId,
           'assistant',
@@ -86,6 +73,10 @@ export class AIService {
           null,
         );
       },
+    });
+
+    return createUIMessageStreamResponse({
+      stream,
     });
   }
 }

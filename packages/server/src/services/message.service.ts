@@ -37,7 +37,7 @@ export class MessageService {
         parts: m.parts,
         metadata: m.metadata,
         createdAt: String(m.createdAt.getTime()),
-      })) as Message[],
+      })),
     };
   }
 

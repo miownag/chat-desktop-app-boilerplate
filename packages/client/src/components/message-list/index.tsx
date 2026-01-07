@@ -18,19 +18,36 @@ export type ChatMessage = {
 };
 
 interface MessageListProps {
+  conversationId: string;
   messages: ChatHookType['messages'];
   status: ChatHookType['status'];
   isActive: boolean;
   regenerate: ChatHookType['regenerate'];
+  setMessages: ChatHookType['setMessages'];
 }
 
 function MessageList({
+  conversationId,
   messages,
   status,
   isActive,
   regenerate,
+  setMessages,
 }: MessageListProps) {
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleFeedbackUpdate = (
+    messageId: string,
+    feedback: 'liked' | 'disliked' | undefined,
+  ) => {
+    setMessages(
+      messages.map((msg) =>
+        msg.id === messageId
+          ? { ...msg, metadata: { ...msg.metadata, feedback } }
+          : msg,
+      ),
+    );
+  };
 
   if (!isActive) {
     return null;
@@ -47,10 +64,12 @@ function MessageList({
             message.role === 'assistant' ? (
               <AssistantMessage
                 key={message.id}
+                conversationId={conversationId}
                 message={message}
                 isLastMessage={index === messages.length - 1}
                 status={status}
                 regenerate={regenerate}
+                onFeedbackUpdate={handleFeedbackUpdate}
               />
             ) : (
               <UserMessage key={message.id} message={message} />

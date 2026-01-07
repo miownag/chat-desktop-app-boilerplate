@@ -41,10 +41,7 @@ function MessageRenderer({
       return (
         <Reasoning isStreaming={isThinking}>
           <ReasoningTrigger>Show AI reasoning</ReasoningTrigger>
-          <ReasoningContent
-            markdown
-            className="ml-2 border-l-2 border-l-slate-200 px-2 pb-1 dark:border-l-slate-700"
-          >
+          <ReasoningContent className="ml-2 border-l-2 border-l-slate-200 px-2 pb-1 dark:border-l-slate-700">
             {part.text}
           </ReasoningContent>
         </Reasoning>

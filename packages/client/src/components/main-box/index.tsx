@@ -71,10 +71,12 @@ function MainBox({
       )}
     >
       <MessageList
+        conversationId={conversationId}
         isActive={isActive}
         messages={messages}
         status={status}
         regenerate={regenerate}
+        setMessages={setMessages}
       />
       <Sender
         enableDeepThink={enableDeepThink}
