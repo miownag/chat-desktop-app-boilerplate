@@ -78,7 +78,10 @@ function MessageList({
           {status === 'submitted' && <Loader variant="typing" />}
         </ChatContainerContent>
         <div className="absolute bottom-4 left-1/2 flex w-full max-w-3xl -translate-x-1/2 justify-center px-5">
-          <ScrollButton className="shadow-sm cursor-pointer" />
+          <ScrollButton
+            className="shadow-sm cursor-pointer"
+            loading={status === 'streaming'}
+          />
         </div>
       </ChatContainerRoot>
     </div>

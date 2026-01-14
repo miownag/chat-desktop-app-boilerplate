@@ -20,7 +20,7 @@ const model = new ChatOpenAI({
   model: 'qwen/qwen3-next-80b',
   apiKey: '',
   configuration: {
-    baseURL: 'http://10.2.37.87:1234/v1',
+    baseURL: 'http://10.2.37.99:1234/v1',
   },
 });
 
